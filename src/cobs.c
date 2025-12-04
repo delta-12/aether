@@ -83,20 +83,21 @@ size_t Cobs_Decode(void *const data, const size_t data_size, const uint8_t *cons
             }
             else
             {
-                if (UINT8_MAX != code)
+                uint8_t byte = *(buffer + buffer_index);
+                block_end = buffer_index + byte;
+                buffer_index++;
+
+                if (0U == byte)
+                {
+                    break;
+                }
+                else if (UINT8_MAX != code)
                 {
                     *((uint8_t *)data + decoded) = 0U;
                     decoded++;
                 }
 
-                code = *(buffer + buffer_index);
-                block_end = buffer_index + code;
-                buffer_index++;
-
-                if (0U == code)
-                {
-                    break;
-                }
+                code = byte;
             }
         }
     }
