@@ -61,24 +61,21 @@ size_t Cobs_Encode(const void *const data, const size_t data_size, uint8_t *cons
 
 size_t Cobs_Decode(void *const data, const size_t data_size, const uint8_t *const buffer, const size_t buffer_size)
 {
-    size_t decoded = 0U;
+    size_t decoded = SIZE_MAX;
 
-    if ((NULL == data) || (NULL == buffer) || (buffer_size <= 1U))
+    if ((NULL != data) && (NULL != buffer) && (buffer_size > 1U))
     {
-        decoded = SIZE_MAX;
-    }
-    else
-    {
+        size_t data_index = 0U;
         size_t buffer_index = 1U;
         uint8_t code = *buffer;
         size_t block_end = buffer_index + code - 1U;
 
-        while ((decoded < data_size) && (buffer_index < buffer_size))
+        while ((data_index < data_size) && (buffer_index < buffer_size))
         {
             if (buffer_index < block_end)
             {
-                *((uint8_t *)data + decoded) = *(buffer + buffer_index);
-                decoded++;
+                *((uint8_t *)data + data_index) = *(buffer + buffer_index);
+                data_index++;
                 buffer_index++;
             }
             else
@@ -89,16 +86,22 @@ size_t Cobs_Decode(void *const data, const size_t data_size, const uint8_t *cons
 
                 if (0U == byte)
                 {
+                    decoded = data_index;
                     break;
                 }
                 else if (UINT8_MAX != code)
                 {
-                    *((uint8_t *)data + decoded) = 0U;
-                    decoded++;
+                    *((uint8_t *)data + data_index) = 0U;
+                    data_index++;
                 }
 
                 code = byte;
             }
+        }
+
+        if ((SIZE_MAX == decoded) && (buffer_index < buffer_size) && (0U == *(buffer + buffer_index)))
+        {
+            decoded = data_index;
         }
     }
 
