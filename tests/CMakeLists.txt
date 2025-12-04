@@ -31,8 +31,8 @@ endif()
 # Aether tests
 ################################################################################
 set(${PROJECT_NAME}_SRCS
-    # TODO
     ${CMAKE_CURRENT_SOURCE_DIR}/cobs_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/leb128_tests.cc
 )
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${${PROJECT_NAME}_SRCS})
 add_executable(${PROJECT_NAME})

@@ -15,8 +15,8 @@ option(AETHER_BUILD_TESTS "Build Aether tests" OFF)
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SRCS
-    # TODO
     ${SRC_DIR}/cobs.c
+    ${SRC_DIR}/leb128.c
 )
 add_library(${PROJECT_NAME})
 target_sources(${PROJECT_NAME}
