@@ -19,6 +19,14 @@ TEST(Cobs, EncodeNullAndEmptyBuffers)
     ASSERT_THAT(buffer, testing::ElementsAreArray(encoded));
 }
 
+TEST(Cobs, EncodeInsufficientSize)
+{
+    std::uint8_t data[] = {0x00U, 0x00U};
+    std::uint8_t buffer[sizeof(data)];
+
+    ASSERT_EQ(SIZE_MAX, Cobs_Encode(data, sizeof(data), buffer, sizeof(buffer)));
+}
+
 TEST(Cobs, EncodeZero)
 {
     std::uint8_t data[] = {0x00U};
