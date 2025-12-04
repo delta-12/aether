@@ -192,13 +192,24 @@ TEST(Cobs, DecodeNullAndEmptyBuffers)
     ASSERT_EQ(0U, Cobs_Decode(data, sizeof(data), buffer, sizeof(buffer)));
 }
 
+TEST(Cobs, DecodeInsufficientSize)
+{
+    std::uint8_t buffer[] = {0x01U, 0x01U, 0x01U, 0x00U};
+    std::uint8_t data[1U];
+
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, 0U, buffer, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), buffer, sizeof(buffer)));
+}
+
 TEST(Cobs, DecodeBadFrame)
 {
-    std::uint8_t decoded[1U];
-    std::uint8_t buffer[] = {0x00U};
-    std::uint8_t data[sizeof(decoded)];
+    std::uint8_t buffer[] = {0x00U, 0x01U, 0x02U, 0x03U};
+    std::uint8_t data[sizeof(buffer)];
 
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), buffer, 1U));
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), &buffer[1U], 1U));
     ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), buffer, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), &buffer[1U], sizeof(buffer) - 1U));
 }
 
 TEST(Cobs, DecodeZero)
