@@ -5,7 +5,7 @@
 
 size_t Cobs_Encode(const void *const data, const size_t data_size, uint8_t *const buffer, const size_t buffer_size)
 {
-    size_t encoded = 1U;
+    size_t encoded = 0U;
 
     if ((NULL == data) || (NULL == buffer))
     {
@@ -16,6 +16,8 @@ size_t Cobs_Encode(const void *const data, const size_t data_size, uint8_t *cons
         size_t data_index = 0U;
         size_t code_index = 0U;
         uint8_t code = 1U;
+
+        encoded = 1U;
 
         while ((data_index < data_size) && (encoded < buffer_size))
         {
@@ -31,7 +33,7 @@ size_t Cobs_Encode(const void *const data, const size_t data_size, uint8_t *cons
                 *(buffer + code_index) = code;
                 code = 1U;
                 code_index = encoded;
-                encoded++; 
+                encoded++;
             }
             else
             {
@@ -61,16 +63,42 @@ size_t Cobs_Decode(void *const data, const size_t data_size, const uint8_t *cons
 {
     size_t decoded = 0U;
 
-    if ((NULL == data) || (NULL == buffer))
+    if ((NULL == data) || (NULL == buffer) || (buffer_size <= 1U))
     {
         decoded = SIZE_MAX;
     }
     else
     {
-        (void)data;
-        (void)data_size;
-        (void)buffer;
-        (void)buffer_size;
+        size_t buffer_index = 1U;
+        uint8_t code = *buffer;
+        size_t block_end = buffer_index + code - 1U;
+
+        while ((decoded < data_size) && (buffer_index < buffer_size))
+        {
+            if (buffer_index < block_end)
+            {
+                *((uint8_t *)data + decoded) = *(buffer + buffer_index);
+                decoded++;
+                buffer_index++;
+            }
+            else
+            {
+                if (UINT8_MAX != code)
+                {
+                    *((uint8_t *)data + decoded) = 0U;
+                    decoded++;
+                }
+
+                code = *(buffer + buffer_index);
+                block_end = buffer_index + code;
+                buffer_index++;
+
+                if (0U == code)
+                {
+                    break;
+                }
+            }
+        }
     }
 
     return decoded;
