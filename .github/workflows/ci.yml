@@ -104,5 +104,6 @@ jobs:
             -Dsonar.projectKey=delta-12_aether
             -Dsonar.organization=delta-12
             -Dsonar.sources=src
-            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+            -Dsonar.tests=tests
+            --define sonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
             --define sonar.coverageReportPaths=build/debug/coverage.xml
