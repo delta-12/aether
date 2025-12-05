@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: d3lta12/alpine-build-tools
+      image: d3lta12/ubuntu-build-tools
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
   cppcheck:
     runs-on: ubuntu-latest
     container:
-      image: d3lta12/alpine-build-tools
+      image: d3lta12/ubuntu-build-tools
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
   uncrustify:
     runs-on: ubuntu-latest
     container:
-      image: d3lta12/alpine-build-tools
+      image: d3lta12/ubuntu-build-tools
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: d3lta12/alpine-build-tools
+      image: d3lta12/ubuntu-build-tools
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
@@ -93,7 +93,7 @@ jobs:
           name: unit-tests-log
           path: build/debug/Testing/Temporary/LastTest.log
       - name: Generate coverage report
-        run: cmake --build build -j$(nproc) -t sonarqube-coverage
+        run: cmake --build build/debug -j$(nproc) -t sonarqube-coverage
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
@@ -104,5 +104,6 @@ jobs:
             -Dsonar.projectKey=delta-12_aether
             -Dsonar.organization=delta-12
             -Dsonar.sources=src
-            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+            -Dsonar.tests=tests
+            --define sonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
             --define sonar.coverageReportPaths=build/debug/coverage.xml
