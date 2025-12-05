@@ -108,6 +108,7 @@ endif()
 ################################################################################
 find_program(GCOVR_PATH gcovr
     HINTS "$ENV{HOME}/.local/bin"
+          "/root/.local/bin"
 )
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     if(GCOVR_PATH)
