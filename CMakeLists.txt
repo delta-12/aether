@@ -51,6 +51,7 @@ set(SRCS
     ${SRC_DIR}/buffer.c
     ${SRC_DIR}/cobs.c
     ${SRC_DIR}/leb128.c
+    ${SRC_DIR}/transport.c
 )
 
 configure_file(

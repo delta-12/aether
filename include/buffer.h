@@ -27,6 +27,8 @@ uint8_t *a_Buffer_GetWrite(const a_Buffer_t *const buffer);
 uint8_t *a_Buffer_GetRead(const a_Buffer_t *const buffer);
 size_t a_Buffer_GetWriteSize(const a_Buffer_t *const buffer);
 size_t a_Buffer_GetReadSize(const a_Buffer_t *const buffer);
+a_Error_t a_Buffer_AppendLeft(a_Buffer_t *const buffer, const a_Buffer_t *const appended);
+a_Error_t a_Buffer_AppendRight(a_Buffer_t *const buffer, const a_Buffer_t *const appended);
 
 #ifdef __cplusplus
 }

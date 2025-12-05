@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define LEB128_MAX_SIZE(value) (size_t)(((sizeof(value) * 8U) / 7U) + 1U)
+
 #ifdef __cplusplus
 extern "C"
 {

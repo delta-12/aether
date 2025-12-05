@@ -124,3 +124,23 @@ size_t a_Buffer_GetReadSize(const a_Buffer_t *const buffer)
 
     return size;
 }
+
+a_Error_t a_Buffer_AppendLeft(a_Buffer_t *const buffer, const a_Buffer_t *const appended)
+{
+    A_UNUSED(buffer);
+    A_UNUSED(appended);
+
+    /* TODO */
+
+    return A_ERROR_SIZE;
+}
+
+a_Error_t a_Buffer_AppendRight(a_Buffer_t *const buffer, const a_Buffer_t *const appended)
+{
+    A_UNUSED(buffer);
+    A_UNUSED(appended);
+
+    /* TODO */
+
+    return A_ERROR_SIZE;
+}

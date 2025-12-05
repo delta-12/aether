@@ -8,6 +8,11 @@
 template <typename T>
 constexpr std::size_t kMaxBufferSize = ((sizeof(T) * 8U) / 7U) + 1U;
 
+TEST(Leb128, MaxSize)
+{
+    ASSERT_EQ(2U + 5U + 10U, (LEB128_MAX_SIZE(std::uint8_t) + LEB128_MAX_SIZE(std::uint32_t) + LEB128_MAX_SIZE(std::uint64_t)));
+}
+
 TEST(Leb128, EncodeNullandEmptyBuffers)
 {
     std::uint8_t buffer[1U];
