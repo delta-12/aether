@@ -78,8 +78,8 @@ jobs:
         with:
           submodules: "recursive"
           fetch-depth: 0
-      - name: Install sonar-scanner and build-wrapper
-        uses: sonarsource/sonarcloud-github-c-cpp@v3
+      - name: Install Sonar Build Wrapper
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v6.0.0
       - name: Setup
         uses: ./.github/actions/setup
       - name: Build tests
@@ -94,14 +94,15 @@ jobs:
           path: build/debug/Testing/Temporary/LastTest.log
       - name: Generate coverage report
         run: cmake --build build -j$(nproc) -t sonarqube-coverage
-      - name: Run sonar-scanner
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=delta-12_aether \
-            -Dsonar.organization=delta-12 \
-            -Dsonar.sources=src \
-            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
+        with:
+          args: >
+            -Dsonar.projectKey=delta-12_aether
+            -Dsonar.organization=delta-12
+            -Dsonar.sources=src
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
             --define sonar.coverageReportPaths=build/debug/coverage.xml
