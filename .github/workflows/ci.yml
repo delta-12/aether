@@ -93,7 +93,7 @@ jobs:
           name: unit-tests-log
           path: build/debug/Testing/Temporary/LastTest.log
       - name: Generate coverage report
-        run: cmake --build build -j$(nproc) -t sonarqube-coverage
+        run: cmake --build build/debug -j$(nproc) -t sonarqube-coverage
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
