@@ -21,7 +21,7 @@ size_t Cobs_Encode(const void *const data, const size_t data_size, uint8_t *cons
 
         while ((data_index < data_size) && (encoded < buffer_size))
         {
-            uint8_t byte = *((uint8_t *)data + data_index);
+            uint8_t byte = *((const uint8_t *const)data + data_index);
 
             if ((0U == byte) || (UINT8_MAX == code))
             {
