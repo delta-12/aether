@@ -61,10 +61,12 @@ TEST(Buffer, SetRead)
     ASSERT_EQ(A_ERROR_NONE, a_Buffer_SetRead(&buffer, 0U));
     ASSERT_EQ(A_ERROR_SIZE, a_Buffer_SetRead(&buffer, 1U));
 
+    a_Buffer_Clear(&buffer);
     a_Buffer_SetWrite(&buffer, 4U);
     ASSERT_EQ(A_ERROR_NONE, a_Buffer_SetRead(&buffer, 4U));
     ASSERT_EQ(A_ERROR_SIZE, a_Buffer_SetRead(&buffer, 1U));
 
+    a_Buffer_Clear(&buffer);
     a_Buffer_SetWrite(&buffer, 4U);
     ASSERT_EQ(A_ERROR_SIZE, a_Buffer_SetRead(&buffer, 5U));
 }
