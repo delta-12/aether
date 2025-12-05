@@ -92,11 +92,6 @@ jobs:
         with:
           name: unit-tests-log
           path: build/debug/Testing/Temporary/LastTest.log
-      - name: View gcovr
-        run: |
-          whoami
-          echo $HOME
-          ls -R $HOME/.local/bin
       - name: Generate coverage report
         run: cmake --build build -j$(nproc) -t sonarqube-coverage
       - name: SonarQube scan
