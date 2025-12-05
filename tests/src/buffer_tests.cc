@@ -4,7 +4,7 @@
 #include <gmock/gmock-matchers.h>
 
 #include "buffer.h"
-#include "types.h"
+#include "error.h"
 
 TEST(Buffer, Initialize)
 {

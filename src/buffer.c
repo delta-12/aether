@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "types.h"
+#include "error.h"
 
 a_Error_t a_Buffer_Initialize(a_Buffer_t *const buffer, uint8_t *const data, const size_t size)
 {
