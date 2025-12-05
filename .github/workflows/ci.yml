@@ -69,7 +69,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     container:
-      image: d3lta12/alpine-build-tools
+      image: d3lta12/ubuntu-build-tools
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
