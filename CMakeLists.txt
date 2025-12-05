@@ -48,6 +48,7 @@ endif()
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SRCS
+    ${SRC_DIR}/buffer.c
     ${SRC_DIR}/cobs.c
     ${SRC_DIR}/leb128.c
 )
