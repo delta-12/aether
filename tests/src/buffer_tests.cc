@@ -70,3 +70,88 @@ TEST(Buffer, SetRead)
     a_Buffer_SetWrite(&buffer, 4U);
     ASSERT_EQ(A_ERROR_SIZE, a_Buffer_SetRead(&buffer, 5U));
 }
+
+TEST(Buffer, GetWrite)
+{
+    a_Buffer_t buffer;
+    std::uint8_t data[4U];
+
+    a_Buffer_Initialize(&buffer, data, sizeof(data));
+    ASSERT_EQ(NULL, a_Buffer_GetWrite(NULL));
+    ASSERT_EQ(&data[0U], a_Buffer_GetWrite(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 1U);
+    ASSERT_EQ(&data[1U], a_Buffer_GetWrite(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 2U);
+    ASSERT_EQ(&data[3U], a_Buffer_GetWrite(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 1U);
+    ASSERT_EQ(NULL, a_Buffer_GetWrite(&buffer));
+}
+
+TEST(Buffer, GetRead)
+{
+    a_Buffer_t buffer;
+    std::uint8_t data[4U];
+
+    a_Buffer_Initialize(&buffer, data, sizeof(data));
+    ASSERT_EQ(NULL, a_Buffer_GetRead(NULL));
+    ASSERT_EQ(NULL, a_Buffer_GetRead(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 1U);
+    ASSERT_EQ(&data[0U], a_Buffer_GetRead(&buffer));
+    a_Buffer_SetRead(&buffer, 1U);
+    ASSERT_EQ(NULL, a_Buffer_GetRead(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 2U);
+    ASSERT_EQ(&data[1U], a_Buffer_GetRead(&buffer));
+    a_Buffer_SetRead(&buffer, 2U);
+    ASSERT_EQ(NULL, a_Buffer_GetRead(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 1U);
+    ASSERT_EQ(&data[3U], a_Buffer_GetRead(&buffer));
+    a_Buffer_SetRead(&buffer, 1U);
+    ASSERT_EQ(NULL, a_Buffer_GetRead(&buffer));
+}
+
+TEST(Buffer, GetWriteSize)
+{
+    a_Buffer_t buffer;
+    std::uint8_t data[4U];
+
+    a_Buffer_Initialize(&buffer, data, sizeof(data));
+    ASSERT_EQ(0U, a_Buffer_GetWriteSize(NULL));
+    ASSERT_EQ(4U, a_Buffer_GetWriteSize(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 2U);
+    ASSERT_EQ(2U, a_Buffer_GetWriteSize(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 1U);
+    ASSERT_EQ(1U, a_Buffer_GetWriteSize(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 1U);
+    ASSERT_EQ(0U, a_Buffer_GetWriteSize(&buffer));
+}
+
+TEST(Buffer, GetReadSize)
+{
+    a_Buffer_t buffer;
+    std::uint8_t data[4U];
+
+    a_Buffer_Initialize(&buffer, data, sizeof(data));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(NULL));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+
+    a_Buffer_SetWrite(&buffer, 4U);
+    ASSERT_EQ(4U, a_Buffer_GetReadSize(&buffer));
+
+    a_Buffer_SetRead(&buffer, 2U);
+    ASSERT_EQ(2U, a_Buffer_GetReadSize(&buffer));
+
+    a_Buffer_SetRead(&buffer, 1U);
+    ASSERT_EQ(1U, a_Buffer_GetReadSize(&buffer));
+
+    a_Buffer_SetRead(&buffer, 1U);
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+}

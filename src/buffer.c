@@ -81,7 +81,7 @@ uint8_t *a_Buffer_GetWrite(const a_Buffer_t *const buffer)
 {
     uint8_t *write = NULL;
 
-    if (NULL != buffer)
+    if ((NULL != buffer) && (buffer->write < buffer->size))
     {
         write = buffer->data + buffer->write;
     }
@@ -93,7 +93,7 @@ uint8_t *a_Buffer_GetRead(const a_Buffer_t *const buffer)
 {
     uint8_t *read = NULL;
 
-    if (NULL != buffer)
+    if ((NULL != buffer) && (buffer->read < buffer->write))
     {
         read = buffer->data + buffer->read;
     }
