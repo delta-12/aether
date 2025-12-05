@@ -70,20 +70,38 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: d3lta12/alpine-build-tools
+    env:
+      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: "recursive"
+          fetch-depth: 0
+      - name: Install sonar-scanner and build-wrapper
+        uses: sonarsource/sonarcloud-github-c-cpp@v3
       - name: Setup
         uses: ./.github/actions/setup
       - name: Build tests
-        run: cmake --build build/debug -j$(nproc) -t AetherTests
-      - name: Run tests
-        run: cmake --build build/debug -j$(nproc) -t test --verbose
+        run: build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/debug -j$(nproc)
+      - name: Execute tests
+        run: ctest --test-dir build/debug --verbose
       - name: Upload unit tests log
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: unit-tests-log
           path: build/debug/Testing/Temporary/LastTest.log
+      - name: Generate coverage report
+        run: cmake --build build -j$(nproc) -t sonarqube-coverage
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=delta-12_aether \
+            -Dsonar.organization=delta-12 \
+            -Dsonar.sources=src \
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
+            --define sonar.coverageReportPaths=build/debug/coverage.xml
