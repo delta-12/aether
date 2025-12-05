@@ -1,0 +1,89 @@
+name: Continuous Integration Workflow
+
+on:
+  push:
+    tags-ignore:
+      - "**"
+    branches:
+      - "**"
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: d3lta12/alpine-build-tools
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Build check
+        run: cmake --build build/Release -j$(nproc) -t Aether
+      - name: Upload build
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aether-Release
+          path: build/release/libAether.*
+  cppcheck:
+    runs-on: ubuntu-latest
+    container:
+      image: d3lta12/alpine-build-tools
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Cppcheck
+        run: cmake --build build/debug -j$(nproc) -t cppcheck
+      - name: Upload Cppcheck Report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cppcheck-report
+          path: build/debug/cppcheck_report.xml
+  uncrustify:
+    runs-on: ubuntu-latest
+    container:
+      image: d3lta12/alpine-build-tools
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Crust check
+        run: cmake --build build/debug -j$(nproc) -t uncrustify-check
+      - name: Upload Uncrustify Report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: uncrustify-report
+          path: build/debug/uncrustify_report.txt
+  unit-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: d3lta12/alpine-build-tools
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Build tests
+        run: cmake --build build/debug -j$(nproc) -t AetherTests
+      - name: Run tests
+        run: cmake --build build/debug -j$(nproc) -t test --verbose
+      - name: Upload unit tests log
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests-log
+          path: build/debug/Testing/Temporary/LastTest.log

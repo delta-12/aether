@@ -1,0 +1,47 @@
+name: Continuous Deployment Workflow
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+  release:
+    runs-on: ubuntu-latest
+    needs: ci
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      tag: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aether-build
+          path: ./aether-build
+      - name: Create pre-release
+        if: ${{ contains(github.ref_name, '-') }}
+        run: |
+          gh release create "$tag" \
+              --title="${tag#v}" \
+              --generate-notes \
+              --latest=false \
+              --prerelease
+      - name: Create release
+        if: ${{ !contains(github.ref_name, '-') }}
+        run: |
+          gh release create "$tag" \
+              --title="${tag#v}" \
+              --generate-notes \
+              --latest=true
+      - name: Upload assets
+        run: |
+          gh release upload "$tag" ./aether-build/*

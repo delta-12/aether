@@ -2,5 +2,9 @@
 _build
 build
 
+# Version header
+include/version.h
+
 # VS Code
-.vscode
+.vscode/*
+!.vscode/launch.json

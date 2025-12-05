@@ -10,6 +10,39 @@ endif()
 option(AETHER_BUILD_TESTS "Build Aether tests" OFF)
 
 ################################################################################
+# Versioning
+################################################################################
+execute_process(
+    COMMAND git rev-parse HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(
+    COMMAND git describe --tags --always
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_TAG
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(
+    COMMAND git status --porcelain
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_STATUS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(GIT_STATUS)
+    set(GIT_DIRTY "Dirty")
+else()
+    set(GIT_DIRTY "Clean")
+endif()
+
+################################################################################
 # Library
 ################################################################################
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
@@ -18,6 +51,12 @@ set(SRCS
     ${SRC_DIR}/cobs.c
     ${SRC_DIR}/leb128.c
 )
+
+configure_file(
+    ${INCLUDE_DIR}/version.h.in
+    ${INCLUDE_DIR}/version.h
+)
+
 add_library(${PROJECT_NAME})
 target_sources(${PROJECT_NAME}
     PRIVATE
@@ -41,22 +80,27 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 ################################################################################
-# CI and tools
-################################################################################
-# TODO
-# set(TOOLS_DIR ${CMAKE_SOURCE_DIR}/tools)
-# set(CPPCHECK_SOURCES ${COMMON_SRCS} ${CPP_SRCS} ${C_SRCS})
-# include(${TOOLS_DIR}/cppcheck/cppcheck.cmake)
-# set(UNCRUSTIFY_SOURCES ${CPPCHECK_SOURCES})
-# set(UNCRUSTIFY_INC_DIRS ${COMMON_INC_DIR} ${CPP_INC_DIR} ${C_INC_DIR})
-# include(${TOOLS_DIR}/uncrustify/uncrustify.cmake)
-
-################################################################################
 # Tests
 ################################################################################
 if(AETHER_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+################################################################################
+# CI and tools
+################################################################################
+set(TOOLS_DIR ${CMAKE_SOURCE_DIR}/tools)
+set(CPPCHECK_SOURCES ${SRCS})
+set(UNCRUSTIFY_SOURCES ${CPPCHECK_SOURCES})
+set(UNCRUSTIFY_INC_DIRS ${INCLUDE_DIR})
+if (CPPCHECK_SOURCES)
+    include(${TOOLS_DIR}/cppcheck/cppcheck.cmake)
+endif()
+if (CPPCHECK_SOURCES AND UNCRUSTIFY_INC_DIRS)
+    # TODO add tests to uncrustify sources
+    set(UNCRUSTIFY_SOURCES ${CPPCHECK_SOURCES})
+    include(${TOOLS_DIR}/uncrustify/uncrustify.cmake)
 endif()
 
 ################################################################################

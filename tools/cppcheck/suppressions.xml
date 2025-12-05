@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<suppressions>
+
+    <!-- Suppress missing includes -->
+    <suppress>
+        <id>missingInclude</id>
+    </suppress>
+    <suppress>
+        <id>missingIncludeSystem</id>
+    </suppress>
+
+    <!-- Suppress unused functions -->
+    <suppress>
+        <id>unusedFunction</id>
+    </suppress>
+
+    <!-- Suppress static linkage for functions to be used outside of translation unit -->
+    <suppress>
+        <id>staticFunction</id>
+        <symbolName>Leb128_Encode64</symbolName>
+    </suppress>
+    <suppress>
+        <id>staticFunction</id>
+        <symbolName>Leb128_Decode64</symbolName>
+    </suppress>
+
+</suppressions>

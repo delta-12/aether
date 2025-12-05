@@ -1,0 +1,18 @@
+name: Setup
+runs:
+  using: "composite"
+  steps:
+    - name: Cache CMake files
+      id: cache-cmake
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-cmake
+      with:
+        path: ./build
+        key: ${{ env.cache-name }}-${{ hashFiles('**/CMakeLists.txt', '**.cmake') }}
+    - name: Generate CMake cache
+      if: ${{ steps.cache-cmake.outputs.cache-hit != 'true' }}
+      run: |
+        cmake -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug -DAETHER_BUILD_TESTS=ON
+        cmake -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release
+      shell: sh
