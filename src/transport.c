@@ -119,14 +119,16 @@ a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_T
     return error;
 }
 
-a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message)
+a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message)
 {
-    a_Buffer_t  serialize_buffer;
-    uint8_t     serialize_data[A_TRANSPORT_SERIALIZE_BUFFER_SIZE];
-    a_Buffer_t *buffer = NULL;
+    a_Err_t error = A_ERR_NULL;
 
-    if ((NULL != message) && (A_ERR_NONE == a_Buffer_Initialize(&serialize_buffer, serialize_data, sizeof(serialize_data))))
+    if (NULL != message)
     {
+        a_Buffer_t serialize_buffer;
+        uint8_t    serialize_data[A_TRANSPORT_SERIALIZE_BUFFER_SIZE];
+        (void)a_Buffer_Initialize(&serialize_buffer, serialize_data, sizeof(serialize_data));
+
         size_t size = Leb128_Encode64(message->header, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
         (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
@@ -137,6 +139,54 @@ a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message)
         (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
         (void)a_Buffer_AppendLeft(&message->buffer, &serialize_buffer);
+
+        error = A_ERR_NONE;
+    }
+
+    return error;
+}
+
+a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message)
+{
+    a_Err_t error = A_ERR_SERIALIZATION;
+
+    if (NULL == message)
+    {
+        error = A_ERR_NULL;
+    }
+    else if (a_Buffer_GetReadSize(&message->buffer) > 0U)
+    {
+        size_t size = Leb128_Decode64((uint64_t *)&message->header, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
+
+        if (SIZE_MAX != size)
+        {
+            (void)a_Buffer_SetRead(&message->buffer, size);
+            size = Leb128_Decode32(&message->peer_id, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
+        }
+
+        if (SIZE_MAX != size)
+        {
+            (void)a_Buffer_SetRead(&message->buffer, size);
+            size = Leb128_Decode64(&message->sequence_number, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
+        }
+
+        if (SIZE_MAX != size)
+        {
+            (void)a_Buffer_SetRead(&message->buffer, size);
+            error = A_ERR_NONE;
+        }
+    }
+
+    return error;
+}
+
+a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message)
+{
+    a_Buffer_t *buffer = NULL;
+
+    if (NULL != message)
+    {
+        buffer = &message->buffer;
     }
 
     return buffer;

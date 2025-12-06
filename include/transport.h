@@ -50,8 +50,9 @@ a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_
 a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id);
 a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id);
 /* TODO publish, subscribe messages */
-a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message);
-/* TODO deserialize message */
+a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message);
+a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message);
+a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message);
 /* TODO get session id, lease, MTU, etc. */
 
 #ifdef __cplusplus
