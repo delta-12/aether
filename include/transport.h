@@ -53,7 +53,7 @@ a_Error_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const 
 a_Error_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_SessionId_t session_id);
 a_Error_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_SessionId_t session_id);
 /* TODO publish, subscribe messages */
-a_Error_t a_Transport_SerializeMessage(a_Transport_Message_t *const message);
+a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message);
 /* TODO deserialize message */
 /* TODO get session id, lease, MTU, etc. */
 

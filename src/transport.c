@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <string.h>
 
 #include "buffer.h"
 #include "error.h"
@@ -119,29 +118,25 @@ a_Error_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a
     return error;
 }
 
-a_Error_t a_Transport_SerializeMessage(a_Transport_Message_t *const message)
+a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message)
 {
-    a_Buffer_t buffer;
-    uint8_t    data[A_TRANSPORT_SERIALIZE_BUFFER_SIZE];
-    a_Error_t  error = a_Buffer_Initialize(&buffer, data, sizeof(data));
+    a_Buffer_t  serialize_buffer;
+    uint8_t     serialize_data[A_TRANSPORT_SERIALIZE_BUFFER_SIZE];
+    a_Buffer_t *buffer = NULL;
 
-    if (NULL == message)
+    if ((NULL != message) && (A_ERROR_NONE == a_Buffer_Initialize(&serialize_buffer, serialize_data, sizeof(serialize_data))))
     {
-        error = A_ERROR_NULL;
-    }
-    else if (A_ERROR_NONE == error)
-    {
-        size_t size = Leb128_Encode8(message->header, a_Buffer_GetWrite(&buffer), a_Buffer_GetWriteSize(&buffer));
-        (void)a_Buffer_SetWrite(&buffer, size);
+        size_t size = Leb128_Encode8(message->header, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
+        (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
-        size = Leb128_Encode32(message->peer_id, a_Buffer_GetWrite(&buffer), a_Buffer_GetWriteSize(&buffer));
-        (void)a_Buffer_SetWrite(&buffer, size);
+        size = Leb128_Encode32(message->peer_id, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
+        (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
-        size = Leb128_Encode64(message->sequence_number, a_Buffer_GetWrite(&buffer), a_Buffer_GetWriteSize(&buffer));
-        (void)a_Buffer_SetWrite(&buffer, size);
+        size = Leb128_Encode64(message->sequence_number, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
+        (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
-        (void)a_Buffer_AppendLeft(&message->buffer, &buffer);
+        (void)a_Buffer_AppendLeft(&message->buffer, &serialize_buffer);
     }
 
-    return error;
+    return buffer;
 }
