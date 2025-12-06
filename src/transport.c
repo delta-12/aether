@@ -4,26 +4,27 @@
 #include <stddef.h>
 
 #include "buffer.h"
-#include "error.h"
+#include "err.h"
 #include "leb128.h"
+#include "tick.h"
 
-#define A_TRANSPORT_SERIALIZE_BUFFER_SIZE (LEB128_MAX_SIZE(uint64_t) + LEB128_MAX_SIZE(a_PeerId_t) + LEB128_MAX_SIZE(a_SequenceNumber_t))
+#define A_TRANSPORT_SERIALIZE_BUFFER_SIZE (LEB128_MAX_SIZE(uint64_t) + LEB128_MAX_SIZE(a_Transport_PeerId_t) + LEB128_MAX_SIZE(a_Transport_SequenceNumber_t))
 
-a_Error_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
-                                        const a_PeerId_t peer_id,
-                                        const a_SequenceNumber_t sequence_number,
-                                        uint8_t *const buffer,
-                                        const size_t size)
+a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
+                                      const a_Transport_PeerId_t peer_id,
+                                      const a_Transport_SequenceNumber_t sequence_number,
+                                      uint8_t *const buffer,
+                                      const size_t size)
 {
-    a_Error_t error = A_ERROR_NONE;
+    a_Err_t error = A_ERR_NONE;
 
     if (NULL == message)
     {
-        error = A_ERROR_NULL;
+        error = A_ERR_NULL;
     }
     else if (size < AETHER_TRANSPORT_MTU)
     {
-        error = A_ERROR_SIZE;
+        error = A_ERR_SIZE;
     }
     else
     {
@@ -36,13 +37,13 @@ a_Error_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
     return error;
 }
 
-a_Error_t a_Transport_MessageOpen(a_Transport_Message_t *const message, const a_SessionId_t session_id, const a_Milliseconds_t lease)
+a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id, const a_Tick_Ms_t lease)
 {
-    a_Error_t error = A_ERROR_NULL;
+    a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
-        message->header = A_HEADER_OPEN;
+        message->header = A_HEADER_CONNECT;
 
         (void)a_Buffer_Clear(&message->buffer);
 
@@ -52,15 +53,15 @@ a_Error_t a_Transport_MessageOpen(a_Transport_Message_t *const message, const a_
         size = Leb128_Encode64(lease, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
         (void)a_Buffer_SetWrite(&message->buffer, size);
 
-        error = A_ERROR_NONE;
+        error = A_ERR_NONE;
     }
 
     return error;
 }
 
-a_Error_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_SessionId_t session_id, const a_Milliseconds_t lease)
+a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id, const a_Tick_Ms_t lease)
 {
-    a_Error_t error = A_ERROR_NULL;
+    a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
@@ -74,15 +75,15 @@ a_Error_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const 
         size = Leb128_Encode64(lease, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
         (void)a_Buffer_SetWrite(&message->buffer, size);
 
-        error = A_ERROR_NONE;
+        error = A_ERR_NONE;
     }
 
     return error;
 }
 
-a_Error_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_SessionId_t session_id)
+a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id)
 {
-    a_Error_t error = A_ERROR_NULL;
+    a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
@@ -93,15 +94,15 @@ a_Error_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a
         size_t size = Leb128_Encode32(session_id, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
         (void)a_Buffer_SetWrite(&message->buffer, size);
 
-        error = A_ERROR_NONE;
+        error = A_ERR_NONE;
     }
 
     return error;
 }
 
-a_Error_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_SessionId_t session_id)
+a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id)
 {
-    a_Error_t error = A_ERROR_NULL;
+    a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
@@ -112,7 +113,7 @@ a_Error_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a
         size_t size = Leb128_Encode32(session_id, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
         (void)a_Buffer_SetWrite(&message->buffer, size);
 
-        error = A_ERROR_NONE;
+        error = A_ERR_NONE;
     }
 
     return error;
@@ -124,7 +125,7 @@ a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message)
     uint8_t     serialize_data[A_TRANSPORT_SERIALIZE_BUFFER_SIZE];
     a_Buffer_t *buffer = NULL;
 
-    if ((NULL != message) && (A_ERROR_NONE == a_Buffer_Initialize(&serialize_buffer, serialize_data, sizeof(serialize_data))))
+    if ((NULL != message) && (A_ERR_NONE == a_Buffer_Initialize(&serialize_buffer, serialize_data, sizeof(serialize_data))))
     {
         size_t size = Leb128_Encode64(message->header, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
         (void)a_Buffer_SetWrite(&serialize_buffer, size);

@@ -9,18 +9,20 @@
 
 typedef enum
 {
-    A_ERROR_NONE,
-    A_ERROR_NULL,
-    A_ERROR_SIZE,
-    A_ERROR_SOCKET
-} a_Error_t;
+    A_ERR_NONE,
+    A_ERR_NULL,
+    A_ERR_SIZE,
+    A_ERR_SERIALIZE,
+    A_ERR_SOCKET,
+    A_ERR_MAX
+} a_Err_t;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif /* __cplusplus */
 
-/* TODO error to string */
+char *a_Err_ToString(const a_Err_t err);
 
 #ifdef __cplusplus
 }
