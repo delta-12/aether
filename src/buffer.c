@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "error.h"
 
@@ -127,20 +128,46 @@ size_t a_Buffer_GetReadSize(const a_Buffer_t *const buffer)
 
 a_Error_t a_Buffer_AppendLeft(a_Buffer_t *const buffer, const a_Buffer_t *const appended)
 {
-    A_UNUSED(buffer);
-    A_UNUSED(appended);
+    a_Error_t error = A_ERROR_NONE;
 
-    /* TODO */
+    if ((NULL == buffer) || (NULL == appended))
+    {
+        error = A_ERROR_NULL;
+    }
+    else if (a_Buffer_GetWriteSize(buffer) < a_Buffer_GetReadSize(appended))
+    {
+        error = A_ERROR_SIZE;
+    }
+    else
+    {
+        size_t   size        = a_Buffer_GetReadSize(appended);
+        uint8_t *buffer_read = buffer->data + buffer->read;
+        memmove((buffer_read + size), buffer_read, a_Buffer_GetReadSize(buffer));
+        memcpy(buffer_read, (appended->data + appended->read), size);
+        (void)a_Buffer_SetWrite(buffer, size);
+    }
 
-    return A_ERROR_SIZE;
+    return error;
 }
 
 a_Error_t a_Buffer_AppendRight(a_Buffer_t *const buffer, const a_Buffer_t *const appended)
 {
-    A_UNUSED(buffer);
-    A_UNUSED(appended);
+    a_Error_t error = A_ERROR_NONE;
 
-    /* TODO */
+    if ((NULL == buffer) || (NULL == appended))
+    {
+        error = A_ERROR_NULL;
+    }
+    else if (a_Buffer_GetWriteSize(buffer) < a_Buffer_GetReadSize(appended))
+    {
+        error = A_ERROR_SIZE;
+    }
+    else
+    {
+        size_t size = a_Buffer_GetReadSize(appended);
+        memcpy((buffer->data + buffer->write), (appended->data + appended->read), size);
+        (void)a_Buffer_SetWrite(buffer, size);
+    }
 
-    return A_ERROR_SIZE;
+    return error;
 }

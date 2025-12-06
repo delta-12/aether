@@ -155,3 +155,79 @@ TEST(Buffer, GetReadSize)
     a_Buffer_SetRead(&buffer, 1U);
     ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
 }
+
+TEST(Buffer, AppendLeft)
+{
+    a_Buffer_t buffer;
+    a_Buffer_t append;
+    std::uint8_t data_buffer[8U] = {0x00U};
+    std::uint8_t data_append[4U] = {0x01U, 0x02U, 0x03U, 0x04U};
+    std::uint8_t *read = NULL;
+
+    a_Buffer_Initialize(&buffer, data_buffer, sizeof(data_buffer));
+    a_Buffer_Initialize(&append, data_append, sizeof(data_append));
+    ASSERT_EQ(A_ERROR_NULL, a_Buffer_AppendLeft(NULL, &append));
+    ASSERT_EQ(A_ERROR_NULL, a_Buffer_AppendLeft(&buffer, NULL));
+    ASSERT_EQ(A_ERROR_NULL, a_Buffer_AppendLeft(NULL, NULL));
+
+    ASSERT_EQ(A_ERROR_NONE, a_Buffer_AppendLeft(&buffer, &append));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+
+    a_Buffer_SetWrite(&append, 2U);
+    ASSERT_EQ(A_ERROR_NONE, a_Buffer_AppendLeft(&buffer, &append));
+    ASSERT_EQ(2U, a_Buffer_GetReadSize(&buffer));
+    read = a_Buffer_GetRead(&buffer);
+    ASSERT_EQ(0x01, *read);
+    ASSERT_EQ(0x02, *(read + 1U));
+
+    a_Buffer_SetRead(&buffer, 1U);
+    a_Buffer_SetWrite(&append, 1U);
+    ASSERT_EQ(A_ERROR_NONE, a_Buffer_AppendLeft(&buffer, &append));
+    ASSERT_EQ(4U, a_Buffer_GetReadSize(&buffer));
+    read = a_Buffer_GetRead(&buffer);
+    ASSERT_EQ(0x01, *read);
+    ASSERT_EQ(0x02, *(read + 1U));
+    ASSERT_EQ(0x03, *(read + 2U));
+    ASSERT_EQ(0x02, *(read + 3U));
+
+    a_Buffer_SetWrite(&append, 1U);
+    ASSERT_EQ(A_ERROR_SIZE, a_Buffer_AppendLeft(&buffer, &append));
+}
+
+TEST(Buffer, AppendRight)
+{
+    a_Buffer_t buffer;
+    a_Buffer_t append;
+    std::uint8_t data_buffer[8U] = {0x00U};
+    std::uint8_t data_append[4U] = {0x01U, 0x02U, 0x03U, 0x04U};
+    std::uint8_t *read = NULL;
+
+    a_Buffer_Initialize(&buffer, data_buffer, sizeof(data_buffer));
+    a_Buffer_Initialize(&append, data_append, sizeof(data_append));
+    ASSERT_EQ(A_ERROR_NULL, a_Buffer_AppendRight(NULL, &append));
+    ASSERT_EQ(A_ERROR_NULL, a_Buffer_AppendRight(&buffer, NULL));
+    ASSERT_EQ(A_ERROR_NULL, a_Buffer_AppendRight(NULL, NULL));
+
+    ASSERT_EQ(A_ERROR_NONE, a_Buffer_AppendRight(&buffer, &append));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+
+    a_Buffer_SetWrite(&append, 2U);
+    ASSERT_EQ(A_ERROR_NONE, a_Buffer_AppendRight(&buffer, &append));
+    ASSERT_EQ(2U, a_Buffer_GetReadSize(&buffer));
+    read = a_Buffer_GetRead(&buffer);
+    ASSERT_EQ(0x01, *read);
+    ASSERT_EQ(0x02, *(read + 1U));
+
+    a_Buffer_SetRead(&buffer, 1U);
+    a_Buffer_SetWrite(&append, 1U);
+    ASSERT_EQ(A_ERROR_NONE, a_Buffer_AppendRight(&buffer, &append));
+    ASSERT_EQ(4U, a_Buffer_GetReadSize(&buffer));
+    read = a_Buffer_GetRead(&buffer);
+    ASSERT_EQ(0x02, *read);
+    ASSERT_EQ(0x01, *(read + 1U));
+    ASSERT_EQ(0x02, *(read + 2U));
+    ASSERT_EQ(0x03, *(read + 3U));
+
+    a_Buffer_SetWrite(&append, 1U);
+    ASSERT_EQ(A_ERROR_SIZE, a_Buffer_AppendRight(&buffer, &append));
+}
