@@ -12,8 +12,6 @@
                                       including LEB128-encoded header, PID, SEQ  */
 #endif                             /* AETHER_MTU */
 
-#define A_HEADER_SIZE sizeof(uint8_t)
-
 /* TODO fix prefix, i.e. a_Transport_ */
 typedef uint32_t a_PeerId_t;
 typedef uint64_t a_SequenceNumber_t;

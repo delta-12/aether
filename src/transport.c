@@ -7,7 +7,7 @@
 #include "error.h"
 #include "leb128.h"
 
-#define A_TRANSPORT_SERIALIZE_BUFFER_SIZE (LEB128_MAX_SIZE(A_HEADER_SIZE) + LEB128_MAX_SIZE(a_PeerId_t) + LEB128_MAX_SIZE(a_SequenceNumber_t))
+#define A_TRANSPORT_SERIALIZE_BUFFER_SIZE (LEB128_MAX_SIZE(uint64_t) + LEB128_MAX_SIZE(a_PeerId_t) + LEB128_MAX_SIZE(a_SequenceNumber_t))
 
 a_Error_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
                                         const a_PeerId_t peer_id,
@@ -126,7 +126,7 @@ a_Buffer_t *a_Transport_SerializeMessage(a_Transport_Message_t *const message)
 
     if ((NULL != message) && (A_ERROR_NONE == a_Buffer_Initialize(&serialize_buffer, serialize_data, sizeof(serialize_data))))
     {
-        size_t size = Leb128_Encode8(message->header, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
+        size_t size = Leb128_Encode64(message->header, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
         (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
         size = Leb128_Encode32(message->peer_id, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
