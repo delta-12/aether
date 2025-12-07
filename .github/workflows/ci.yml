@@ -1,8 +1,8 @@
 name: Continuous Integration Workflow
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
   push:
     tags-ignore:
       - "**"
@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    if: github.event_name != 'pull_request'
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container:
       image: d3lta12/ubuntu-build-tools
@@ -32,7 +32,7 @@ jobs:
           name: Aether-Release
           path: build/release/libAether.*
   cppcheck:
-    if: github.event_name != 'pull_request'
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container:
       image: d3lta12/ubuntu-build-tools
@@ -52,7 +52,7 @@ jobs:
           name: cppcheck-report
           path: build/debug/cppcheck_report.xml
   uncrustify:
-    if: github.event_name != 'pull_request'
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container:
       image: d3lta12/ubuntu-build-tools
