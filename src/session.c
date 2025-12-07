@@ -132,6 +132,7 @@ static a_Err_t a_Session_Accept(Session_t *const session)
 
         if ((A_ERR_NONE != error) || (0U != a_Buffer_GetReadSize(a_Transport_GetMessageBuffer(&message))))
         {
+            /* Error receiving message or no message received */
         }
         else if (A_TRANSPORT_HEADER_CONNECT == a_Transport_GetMessageHeader(&message))
         {
