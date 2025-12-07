@@ -1,6 +1,8 @@
 name: Continuous Integration Workflow
 
 on:
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
   push:
     tags-ignore:
       - "**"
@@ -10,6 +12,7 @@ on:
 
 jobs:
   build:
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container:
       image: d3lta12/ubuntu-build-tools
@@ -29,6 +32,7 @@ jobs:
           name: Aether-Release
           path: build/release/libAether.*
   cppcheck:
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container:
       image: d3lta12/ubuntu-build-tools
@@ -48,6 +52,7 @@ jobs:
           name: cppcheck-report
           path: build/debug/cppcheck_report.xml
   uncrustify:
+    # if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container:
       image: d3lta12/ubuntu-build-tools
@@ -72,6 +77,10 @@ jobs:
       image: d3lta12/ubuntu-build-tools
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -104,6 +113,9 @@ jobs:
             -Dsonar.projectKey=delta-12_aether
             -Dsonar.organization=delta-12
             -Dsonar.sources=src
-            -Dsonar.tests=tests
+            -Dsonar.tests=tests/src
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
             --define sonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
             --define sonar.coverageReportPaths=build/debug/coverage.xml

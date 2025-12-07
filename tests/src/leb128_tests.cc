@@ -8,6 +8,11 @@
 template <typename T>
 constexpr std::size_t kMaxBufferSize = ((sizeof(T) * 8U) / 7U) + 1U;
 
+TEST(Leb128, MaxSize)
+{
+    ASSERT_EQ(2U + 5U + 10U, (LEB128_MAX_SIZE(std::uint8_t) + LEB128_MAX_SIZE(std::uint32_t) + LEB128_MAX_SIZE(std::uint64_t)));
+}
+
 TEST(Leb128, EncodeNullandEmptyBuffers)
 {
     std::uint8_t buffer[1U];
@@ -172,16 +177,24 @@ TEST(Leb128, DecodeNullandEmptyBuffers)
 
 TEST(Leb128, DecodeBadEncoding)
 {
-    std::uint8_t buffer[kMaxBufferSize<std::uint64_t>] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU};
+    std::uint8_t buffer[kMaxBufferSize<std::uint64_t> + 1U] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x00U};
     std::uint8_t u8;
     std::uint16_t u16;
     std::uint32_t u32;
     std::uint64_t u64;
 
     ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer, kMaxBufferSize<std::uint8_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer, kMaxBufferSize<std::uint8_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer + 8U, kMaxBufferSize<std::uint8_t> + 1U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer, kMaxBufferSize<std::uint16_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer, kMaxBufferSize<std::uint16_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer + 7U, kMaxBufferSize<std::uint16_t> + 1U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer, kMaxBufferSize<std::uint32_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer, kMaxBufferSize<std::uint32_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer + 5U, kMaxBufferSize<std::uint32_t> + 1U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, kMaxBufferSize<std::uint64_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, kMaxBufferSize<std::uint64_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, kMaxBufferSize<std::uint64_t> + 1U));
 }
 
 TEST(Leb128, Decode8)
@@ -189,6 +202,7 @@ TEST(Leb128, Decode8)
     std::uint8_t encoded_zero[] = {0x00U};
     std::uint8_t encoded_one[] = {0x01U};
     std::uint8_t encoded_max[] = {0xFFU, 0x01U};
+    std::uint8_t encoded_max_extended[] = {0xFFU, 0x01U, 0xFFU};
     std::uint8_t encoded_negative_max[] = {0x80U, 0x01U};
     std::uint8_t value;
 
@@ -207,6 +221,10 @@ TEST(Leb128, Decode8)
     ASSERT_EQ(UINT8_MAX, value);
     value = 0U;
 
+    ASSERT_EQ(sizeof(encoded_max_extended) - 1U, Leb128_Decode8(&value, encoded_max_extended, sizeof(encoded_max_extended)));
+    ASSERT_EQ(UINT8_MAX, value);
+    value = 0U;
+
     ASSERT_EQ(sizeof(encoded_negative_max), Leb128_Decode8(&value, encoded_negative_max, sizeof(encoded_negative_max)));
     ASSERT_EQ(INT8_MIN, static_cast<std::int8_t>(value));
 }
@@ -216,6 +234,7 @@ TEST(Leb128, Decode16)
     std::uint8_t encoded_zero[] = {0x00U};
     std::uint8_t encoded_one[] = {0x01U};
     std::uint8_t encoded_max[] = {0xFFU, 0xFFU, 0x03U};
+    std::uint8_t encoded_max_extended[] = {0xFFU, 0xFFU, 0x03U, 0xFFU};
     std::uint8_t encoded_negative_max[] = {0x80U, 0x80U, 0x02U};
     std::uint16_t value;
 
@@ -234,6 +253,10 @@ TEST(Leb128, Decode16)
     ASSERT_EQ(UINT16_MAX, value);
     value = 0U;
 
+    ASSERT_EQ(sizeof(encoded_max_extended) - 1U, Leb128_Decode16(&value, encoded_max_extended, sizeof(encoded_max_extended)));
+    ASSERT_EQ(UINT16_MAX, value);
+    value = 0U;
+
     ASSERT_EQ(sizeof(encoded_negative_max), Leb128_Decode16(&value, encoded_negative_max, sizeof(encoded_negative_max)));
     ASSERT_EQ(INT16_MIN, static_cast<std::int16_t>(value));
 }
@@ -243,6 +266,7 @@ TEST(Leb128, Decode32)
     std::uint8_t encoded_zero[] = {0x00U};
     std::uint8_t encoded_one[] = {0x01U};
     std::uint8_t encoded_max[] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x0FU};
+    std::uint8_t encoded_max_extended[] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x0FU, 0xFFU};
     std::uint8_t encoded_negative_max[] = {0x80U, 0x80U, 0x80U, 0x80U, 0x08U};
     std::uint32_t value;
 
@@ -261,6 +285,10 @@ TEST(Leb128, Decode32)
     ASSERT_EQ(UINT32_MAX, value);
     value = 0U;
 
+    ASSERT_EQ(sizeof(encoded_max_extended) - 1U, Leb128_Decode32(&value, encoded_max_extended, sizeof(encoded_max_extended)));
+    ASSERT_EQ(UINT32_MAX, value);
+    value = 0U;
+
     ASSERT_EQ(sizeof(encoded_negative_max), Leb128_Decode32(&value, encoded_negative_max, sizeof(encoded_negative_max)));
     ASSERT_EQ(INT32_MIN, static_cast<std::int32_t>(value));
 }
@@ -270,6 +298,7 @@ TEST(Leb128, Decode64)
     std::uint8_t encoded_zero[] = {0x00U};
     std::uint8_t encoded_one[] = {0x01U};
     std::uint8_t encoded_max[] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x01U};
+    std::uint8_t encoded_max_extended[] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x01U, 0xFFU};
     std::uint8_t encoded_negative_max[] = {0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x01U};
     std::uint64_t value;
 
@@ -285,6 +314,10 @@ TEST(Leb128, Decode64)
     value = 0U;
 
     ASSERT_EQ(sizeof(encoded_max), Leb128_Decode64(&value, encoded_max, sizeof(encoded_max)));
+    ASSERT_EQ(UINT64_MAX, value);
+    value = 0U;
+
+    ASSERT_EQ(sizeof(encoded_max_extended) - 1U, Leb128_Decode64(&value, encoded_max_extended, sizeof(encoded_max_extended)));
     ASSERT_EQ(UINT64_MAX, value);
     value = 0U;
 
