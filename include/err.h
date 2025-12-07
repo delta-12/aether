@@ -12,8 +12,9 @@ typedef enum
     A_ERR_NONE,
     A_ERR_NULL,
     A_ERR_SIZE,
-    A_ERR_SERIALIZE,
+    A_ERR_SERIALIZATION,
     A_ERR_SOCKET,
+    A_ERR_SEQUENCE,
     A_ERR_MAX
 } a_Err_t;
 

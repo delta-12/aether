@@ -15,16 +15,19 @@
 
 typedef uint32_t a_Transport_PeerId_t;
 typedef uint64_t a_Transport_SequenceNumber_t;
-typedef uint32_t a_Transport_SessionId_t;
+
+#define A_TRANSPORT_PEER_ID_MAX         (a_Transport_PeerId_t)(UINT64_MAX)
+#define A_TRANSPORT_SEQUENCE_NUMBER_MAX (a_Transport_SequenceNumber_t)(UINT64_MAX)
 
 typedef enum
 {
-    A_HEADER_CONNECT,
-    A_HEADER_ACCEPT,
-    A_HEADER_CLOSE,
-    A_HEADER_RENEW,
-    A_HEADER_SUBSCRIBE,
-    A_HEADER_PUBLISH
+    A_TRANSPORT_HEADER_CONNECT,
+    A_TRANSPORT_HEADER_ACCEPT,
+    A_TRANSPORT_HEADER_CLOSE,
+    A_TRANSPORT_HEADER_RENEW,
+    A_TRANSPORT_HEADER_SUBSCRIBE,
+    A_TRANSPORT_HEADER_PUBLISH,
+    A_TRANSPORT_HEADER_MAX
 } a_Transport_Header_t;
 
 typedef struct
@@ -45,15 +48,17 @@ a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
                                       const a_Transport_SequenceNumber_t sequence_number,
                                       uint8_t *const buffer,
                                       const size_t size);
-a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id, const a_Tick_Ms_t lease);
-a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id, const a_Tick_Ms_t lease);
-a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id);
-a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id);
+a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a_Tick_Ms_t lease);
+a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_Tick_Ms_t lease);
+a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message);
+a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message);
 /* TODO publish, subscribe messages */
 a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message);
 a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message);
 a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message);
-/* TODO get session id, lease, MTU, etc. */
+a_Transport_Header_t a_Transport_GetMessageHeader(const a_Transport_Message_t *const message);
+a_Transport_PeerId_t a_Transport_GetMessagePeerId(const a_Transport_Message_t *const message);
+a_Tick_Ms_t a_Transport_GetMessageLease(a_Transport_Message_t *const message);
 
 #ifdef __cplusplus
 }

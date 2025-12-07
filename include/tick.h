@@ -5,6 +5,8 @@
 
 typedef uint64_t a_Tick_Ms_t;
 
+#define A_TICK_MS_MAX (a_Tick_Ms_t)(UINT64_MAX)
+
 #ifdef __cplusplus
 extern "C"
 {

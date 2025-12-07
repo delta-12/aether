@@ -15,11 +15,14 @@ char *a_Err_ToString(const a_Err_t err)
     case A_ERR_SIZE:
         string = "ERR_SIZE";
         break;
-    case A_ERR_SERIALIZE:
-        string = "ERR_SERIALIZE";
+    case A_ERR_SERIALIZATION:
+        string = "ERR_SERIALIZATION";
         break;
     case A_ERR_SOCKET:
         string = "ERR_SOCKET";
+        break;
+    case A_ERR_SEQUENCE:
+        string = "ERR_SEQUENCE";
         break;
     default:
         break;

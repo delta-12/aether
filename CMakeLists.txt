@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.30)
 project(Aether LANGUAGES C CXX)
 
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=always")
+# Add global flags for other compilers here
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
@@ -52,6 +57,7 @@ set(SRCS
     ${SRC_DIR}/cobs.c
     ${SRC_DIR}/err.c
     ${SRC_DIR}/leb128.c
+    ${SRC_DIR}/router.c
     ${SRC_DIR}/session.c
     ${SRC_DIR}/socket.c
     ${SRC_DIR}/transport.c

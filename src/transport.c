@@ -37,20 +37,19 @@ a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
     return error;
 }
 
-a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id, const a_Tick_Ms_t lease)
+a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a_Tick_Ms_t lease)
 {
     a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
-        message->header = A_HEADER_CONNECT;
+        message->header = A_TRANSPORT_HEADER_CONNECT;
 
         (void)a_Buffer_Clear(&message->buffer);
 
-        size_t size = Leb128_Encode32(session_id, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
-        (void)a_Buffer_SetWrite(&message->buffer, size);
+        /* TODO encode version and MTU */
 
-        size = Leb128_Encode64(lease, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
+        size_t size = Leb128_Encode64(lease, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
         (void)a_Buffer_SetWrite(&message->buffer, size);
 
         error = A_ERR_NONE;
@@ -59,20 +58,17 @@ a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a
     return error;
 }
 
-a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id, const a_Tick_Ms_t lease)
+a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_Tick_Ms_t lease)
 {
     a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
-        message->header = A_HEADER_ACCEPT;
+        message->header = A_TRANSPORT_HEADER_ACCEPT;
 
         (void)a_Buffer_Clear(&message->buffer);
 
-        size_t size = Leb128_Encode32(session_id, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
-        (void)a_Buffer_SetWrite(&message->buffer, size);
-
-        size = Leb128_Encode64(lease, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
+        size_t size = Leb128_Encode64(lease, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
         (void)a_Buffer_SetWrite(&message->buffer, size);
 
         error = A_ERR_NONE;
@@ -81,18 +77,15 @@ a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_
     return error;
 }
 
-a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id)
+a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message)
 {
     a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
-        message->header = A_HEADER_CLOSE;
+        message->header = A_TRANSPORT_HEADER_CLOSE;
 
         (void)a_Buffer_Clear(&message->buffer);
-
-        size_t size = Leb128_Encode32(session_id, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
-        (void)a_Buffer_SetWrite(&message->buffer, size);
 
         error = A_ERR_NONE;
     }
@@ -100,18 +93,15 @@ a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message, const a_T
     return error;
 }
 
-a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message, const a_Transport_SessionId_t session_id)
+a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message)
 {
     a_Err_t error = A_ERR_NULL;
 
     if (NULL != message)
     {
-        message->header = A_HEADER_RENEW;
+        message->header = A_TRANSPORT_HEADER_RENEW;
 
         (void)a_Buffer_Clear(&message->buffer);
-
-        size_t size = Leb128_Encode32(session_id, a_Buffer_GetWrite(&message->buffer), a_Buffer_GetWriteSize(&message->buffer));
-        (void)a_Buffer_SetWrite(&message->buffer, size);
 
         error = A_ERR_NONE;
     }
@@ -190,4 +180,73 @@ a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message)
     }
 
     return buffer;
+}
+
+a_Transport_Header_t a_Transport_GetMessageHeader(const a_Transport_Message_t *const message)
+{
+    a_Transport_Header_t header = A_TRANSPORT_HEADER_MAX;
+
+    if (NULL != message)
+    {
+        switch (message->header)
+        {
+        case A_TRANSPORT_HEADER_CONNECT:
+        case A_TRANSPORT_HEADER_ACCEPT:
+        case A_TRANSPORT_HEADER_CLOSE:
+        case A_TRANSPORT_HEADER_RENEW:
+        case A_TRANSPORT_HEADER_SUBSCRIBE:
+        case A_TRANSPORT_HEADER_PUBLISH:
+            header = message->header;
+            break;
+        default:
+            break;
+        }
+    }
+
+    return header;
+}
+
+a_Transport_PeerId_t a_Transport_GetMessagePeerId(const a_Transport_Message_t *const message)
+{
+    a_Transport_PeerId_t peer_id = A_TRANSPORT_PEER_ID_MAX;
+
+    if (NULL != message)
+    {
+        peer_id = message->peer_id;
+    }
+
+    return peer_id;
+}
+
+a_Tick_Ms_t a_Transport_GetMessageLease(a_Transport_Message_t *const message)
+{
+    a_Tick_Ms_t lease = A_TICK_MS_MAX;
+
+    if (NULL != message)
+    {
+        size_t size;
+        switch (message->header)
+        {
+        case A_TRANSPORT_HEADER_CONNECT:
+        case A_TRANSPORT_HEADER_ACCEPT:
+            size = Leb128_Decode64(&lease, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
+            if (SIZE_MAX != size)
+            {
+                (void)a_Buffer_SetRead(&message->buffer, size);
+            }
+            else
+            {
+                lease = A_TICK_MS_MAX;
+            }
+            break;
+        case A_TRANSPORT_HEADER_CLOSE:
+        case A_TRANSPORT_HEADER_RENEW:
+        case A_TRANSPORT_HEADER_SUBSCRIBE:
+        case A_TRANSPORT_HEADER_PUBLISH:
+        default:
+            break;
+        }
+    }
+
+    return lease;
 }

@@ -14,14 +14,4 @@
         <id>unusedFunction</id>
     </suppress>
 
-    <!-- Suppress static linkage for functions to be used outside of translation unit -->
-    <suppress>
-        <id>staticFunction</id>
-        <symbolName>a_Buffer_GetReadSize</symbolName>
-    </suppress>
-    <suppress>
-        <id>staticFunction</id>
-        <symbolName>Leb128_Decode64</symbolName>
-    </suppress>
-
 </suppressions>
