@@ -177,16 +177,24 @@ TEST(Leb128, DecodeNullandEmptyBuffers)
 
 TEST(Leb128, DecodeBadEncoding)
 {
-    std::uint8_t buffer[kMaxBufferSize<std::uint64_t>] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU};
+    std::uint8_t buffer[kMaxBufferSize<std::uint64_t> + 1U] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x00U};
     std::uint8_t u8;
     std::uint16_t u16;
     std::uint32_t u32;
     std::uint64_t u64;
 
     ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer, kMaxBufferSize<std::uint8_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer, kMaxBufferSize<std::uint8_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer + 8U, kMaxBufferSize<std::uint8_t> + 1U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer, kMaxBufferSize<std::uint16_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer, kMaxBufferSize<std::uint16_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer + 7U, kMaxBufferSize<std::uint16_t> + 1U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer, kMaxBufferSize<std::uint32_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer, kMaxBufferSize<std::uint32_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer + 5U, kMaxBufferSize<std::uint32_t> + 1U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, kMaxBufferSize<std::uint64_t> - 1U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, kMaxBufferSize<std::uint64_t>));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, kMaxBufferSize<std::uint64_t> + 1U));
 }
 
 TEST(Leb128, Decode8)
