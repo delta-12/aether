@@ -10,27 +10,16 @@
 
 #define A_TRANSPORT_SERIALIZE_BUFFER_SIZE (LEB128_MAX_SIZE(uint64_t) + LEB128_MAX_SIZE(a_Transport_PeerId_t) + LEB128_MAX_SIZE(a_Transport_SequenceNumber_t))
 
-a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
-                                      const a_Transport_PeerId_t peer_id,
-                                      const a_Transport_SequenceNumber_t sequence_number,
-                                      uint8_t *const buffer,
-                                      const size_t size)
+a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message, uint8_t *const buffer, const size_t size)
 {
-    a_Err_t error = A_ERR_NONE;
+    a_Err_t error = A_ERR_SIZE;
 
     if (NULL == message)
     {
         error = A_ERR_NULL;
     }
-    else if (size < AETHER_TRANSPORT_MTU)
+    else if (size >= AETHER_TRANSPORT_MTU)
     {
-        error = A_ERR_SIZE;
-    }
-    else
-    {
-        message->peer_id         = peer_id;
-        message->sequence_number = sequence_number;
-
         error = a_Buffer_Initialize(&message->buffer, buffer, AETHER_TRANSPORT_MTU);
     }
 
@@ -109,7 +98,7 @@ a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message)
     return error;
 }
 
-a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message)
+a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message, const a_Transport_PeerId_t peer_id, const a_Transport_SequenceNumber_t sequence_number)
 {
     a_Err_t error = A_ERR_NULL;
 
@@ -122,10 +111,12 @@ a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message)
         size_t size = Leb128_Encode64(message->header, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
         (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
-        size = Leb128_Encode32(message->peer_id, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
+        message->peer_id = peer_id;
+        size             = Leb128_Encode32(message->peer_id, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
         (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
-        size = Leb128_Encode64(message->sequence_number, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
+        message->sequence_number = sequence_number;
+        size                     = Leb128_Encode64(message->sequence_number, a_Buffer_GetWrite(&serialize_buffer), a_Buffer_GetWriteSize(&serialize_buffer));
         (void)a_Buffer_SetWrite(&serialize_buffer, size);
 
         (void)a_Buffer_AppendLeft(&message->buffer, &serialize_buffer);

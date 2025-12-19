@@ -50,3 +50,19 @@ void *a_Hashmap_Get(a_Hashmap_t *const hashmap, const void *const key)
 
     return value;
 }
+
+a_Err_t a_Hashmap_Remove(a_Hashmap_t *const hashmap, const void *const key)
+{
+    a_Err_t error = A_ERR_NONE;
+
+    if ((NULL == hashmap) || (NULL == key))
+    {
+        error = A_ERR_NULL;
+    }
+    else if (NULL != a_Hashmap_Get(hashmap, key))
+    {
+        /* TODO */
+    }
+
+    return error;
+}

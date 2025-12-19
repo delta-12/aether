@@ -43,17 +43,13 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message,
-                                      const a_Transport_PeerId_t peer_id,
-                                      const a_Transport_SequenceNumber_t sequence_number,
-                                      uint8_t *const buffer,
-                                      const size_t size);
+a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message, uint8_t *const buffer, const size_t size);
 a_Err_t a_Transport_MessageConnect(a_Transport_Message_t *const message, const a_Tick_Ms_t lease);
 a_Err_t a_Transport_MessageAccept(a_Transport_Message_t *const message, const a_Tick_Ms_t lease);
 a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message);
 a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message);
 /* TODO publish, subscribe messages */
-a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message);
+a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message, const a_Transport_PeerId_t peer_id, const a_Transport_SequenceNumber_t sequence_number);
 a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message);
 a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message);
 a_Transport_Header_t a_Transport_GetMessageHeader(const a_Transport_Message_t *const message);

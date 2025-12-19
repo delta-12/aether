@@ -14,8 +14,8 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-a_Err_t a_Router_Initialize(void);
-a_Err_t a_Router_SessionAdd(a_Router_SessionId_t *const id, a_Socket_t *const socket);
+a_Err_t a_Router_Initialize(const a_Transport_PeerId_t id);
+a_Err_t a_Router_SessionAdd(const a_Router_SessionId_t id, a_Socket_t *const socket);
 a_Err_t a_Router_SessionDelete(const a_Router_SessionId_t id);
 a_Err_t a_Router_SessionMessageGet(const a_Router_SessionId_t id, a_Transport_Message_t *const message);
 a_Err_t a_Router_SessionMessageSend(const a_Router_SessionId_t id, a_Transport_Message_t *const message);

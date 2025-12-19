@@ -22,6 +22,7 @@ extern "C"
 a_Err_t a_Hashmap_Initialize(a_Hashmap_t *const hashmap, uint8_t *const data, const size_t size, const size_t key_size, const size_t value_size);
 a_Err_t a_Hashmap_Insert(a_Hashmap_t *const hashmap, const void *const key, const void *const value);
 void *a_Hashmap_Get(a_Hashmap_t *const hashmap, const void *const key);
+a_Err_t a_Hashmap_Remove(a_Hashmap_t *const hashmap, const void *const key);
 
 #ifdef __cplusplus
 }

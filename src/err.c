@@ -24,6 +24,9 @@ char *a_Err_ToString(const a_Err_t err)
     case A_ERR_SEQUENCE:
         string = "ERR_SEQUENCE";
         break;
+    case A_ERR_DUPLICATE:
+        string = "ERR_DUPLICATE";
+        break;
     default:
         break;
     }

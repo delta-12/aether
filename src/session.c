@@ -5,26 +5,9 @@
 #include "socket.h"
 #include "transport.h"
 
-static a_Transport_PeerId_t peer_id = 0U;
-
-static a_Transport_SequenceNumber_t a_Session_GetSequenceNumber(void);
 static a_Err_t a_Session_Connect(Session_t *const session);
 static a_Err_t a_Session_Accept(Session_t *const session);
 static a_Err_t a_Session_Open(Session_t *const session);
-
-void a_Session_SetPeerId(const a_Transport_PeerId_t *const id)
-{
-    if (NULL == id)
-    {
-        peer_id = 0U; /* TODO randomly generate */
-    }
-    else
-    {
-        peer_id = *id;
-    }
-
-    /* TODO log peer id */
-}
 
 a_Err_t a_Session_Initialize(Session_t *const session, a_Socket_t *const socket, uint8_t *const buffer, const size_t buffer_size)
 {
@@ -39,7 +22,7 @@ a_Err_t a_Session_Initialize(Session_t *const session, a_Socket_t *const socket,
 
         /* TODO log new session with ID and state */
 
-        error = a_Router_SessionAdd(&session->id, socket);
+        error = a_Router_SessionAdd(session->id, socket);
     }
 
     return error;
@@ -87,17 +70,10 @@ a_Err_t a_Session_Task(Session_t *const session)
     return error;
 }
 
-static a_Transport_SequenceNumber_t a_Session_GetSequenceNumber(void)
-{
-    static a_Transport_SequenceNumber_t a_sequence_number = 0U;
-
-    return a_sequence_number++;
-}
-
 static a_Err_t a_Session_Connect(Session_t *const session)
 {
     a_Transport_Message_t message;
-    a_Err_t               error = a_Transport_MessageInitialize(&message, peer_id, a_Session_GetSequenceNumber(), session->buffer, session->buffer_size);
+    a_Err_t               error = a_Transport_MessageInitialize(&message, session->buffer, session->buffer_size);
 
     if (A_ERR_NONE == error)
     {
@@ -122,7 +98,7 @@ static a_Err_t a_Session_Connect(Session_t *const session)
 static a_Err_t a_Session_Accept(Session_t *const session)
 {
     a_Transport_Message_t message;
-    a_Err_t               error = a_Transport_MessageInitialize(&message, peer_id, a_Session_GetSequenceNumber(), session->buffer, session->buffer_size);
+    a_Err_t               error = a_Transport_MessageInitialize(&message, session->buffer, session->buffer_size);
 
     /* TODO timeout and retries */
 
