@@ -17,6 +17,7 @@ a_Err_t a_Serial_Send(size_t (*send)(const uint8_t *const data, const size_t siz
     }
     else if (a_Buffer_GetReadSize(data) > 0U)
     {
+        /* TODO CRC before COBS encode */
         size_t encoded = Cobs_Encode(a_Buffer_GetRead(data), a_Buffer_GetReadSize(data), a_Buffer_GetWrite(buffer), a_Buffer_GetWriteSize(buffer));
 
         if (SIZE_MAX == encoded)
@@ -83,6 +84,8 @@ a_Err_t a_Serial_Receive(size_t (*receive)(uint8_t *const data, const size_t siz
             {
                 (void)a_Buffer_SetWrite(data, decoded);
                 (void)a_Buffer_SetRead(buffer, a_Buffer_GetReadSize(buffer));
+
+                /* TODO check CRC after COBS decode */
             }
         }
         else if (a_Buffer_GetWriteSize(buffer) > 0U)
