@@ -209,6 +209,18 @@ a_Transport_PeerId_t a_Transport_GetMessagePeerId(const a_Transport_Message_t *c
     return peer_id;
 }
 
+a_Transport_SequenceNumber_t a_Transport_GetMessageSequenceNumber(const a_Transport_Message_t *const message)
+{
+    a_Transport_SequenceNumber_t sequence_number = A_TRANSPORT_SEQUENCE_NUMBER_MAX;
+
+    if (NULL != message)
+    {
+        sequence_number = message->sequence_number;
+    }
+
+    return sequence_number;
+}
+
 a_Tick_Ms_t a_Transport_GetMessageLease(a_Transport_Message_t *const message)
 {
     a_Tick_Ms_t lease = A_TICK_MS_MAX;

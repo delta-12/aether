@@ -71,12 +71,21 @@ a_Err_t a_Router_SessionMessageGet(const a_Router_SessionId_t id, a_Transport_Me
     {
         error = a_Transport_DeserializeMessage(message);
 
-        a_Transport_PeerId_t         peer_id = a_Transport_GetMessagePeerId(message);
-        a_Transport_SequenceNumber_t sequence_number; /* TODO */
+        const a_Transport_PeerId_t                peer_id                 = a_Transport_GetMessagePeerId(message);
+        const a_Transport_SequenceNumber_t        sequence_number         = a_Transport_GetMessageSequenceNumber(message);
+        const a_Transport_SequenceNumber_t *const current_sequence_number = a_Hashmap_Get(&a_Router_Peers, &peer_id);
 
-        if ((A_TRANSPORT_PEER_ID_MAX == peer_id) || (A_TRANSPORT_SEQUENCE_NUMBER_MAX == sequence_number))
+        if (A_ERR_NONE != error)
+        {
+            /* Error deserializing message */
+        }
+        else if ((A_TRANSPORT_PEER_ID_MAX == peer_id) || (A_TRANSPORT_SEQUENCE_NUMBER_MAX == sequence_number))
         {
             error = A_ERR_SERIALIZATION;
+        }
+        else if ((NULL != current_sequence_number) && (sequence_number <= *current_sequence_number))
+        {
+            error = A_ERR_SEQUENCE;
         }
         else
         {

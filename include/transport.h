@@ -54,6 +54,7 @@ a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message);
 a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message);
 a_Transport_Header_t a_Transport_GetMessageHeader(const a_Transport_Message_t *const message);
 a_Transport_PeerId_t a_Transport_GetMessagePeerId(const a_Transport_Message_t *const message);
+a_Transport_SequenceNumber_t a_Transport_GetMessageSequenceNumber(const a_Transport_Message_t *const message);
 a_Tick_Ms_t a_Transport_GetMessageLease(a_Transport_Message_t *const message);
 
 #ifdef __cplusplus
