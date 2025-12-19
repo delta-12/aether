@@ -11,7 +11,7 @@
 #define AETHER_TRANSPORT_MTU 2048U /* TODO ensure this is less than SIZE_MAX \
                                       and is large enough to hold theoretical maximum transport message \
                                       including LEB128-encoded header, PID, SEQ  */
-#endif                             /* AETHER_MTU */
+#endif                             /* AETHER_TRANSPORT_MTU */
 
 typedef uint32_t a_Transport_PeerId_t;
 typedef uint64_t a_Transport_SequenceNumber_t;
