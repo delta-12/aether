@@ -56,8 +56,10 @@ set(SRCS
     ${SRC_DIR}/buffer.c
     ${SRC_DIR}/cobs.c
     ${SRC_DIR}/err.c
+    ${SRC_DIR}/hashmap.c
     ${SRC_DIR}/leb128.c
     ${SRC_DIR}/router.c
+    ${SRC_DIR}/serial.c
     ${SRC_DIR}/session.c
     ${SRC_DIR}/socket.c
     ${SRC_DIR}/transport.c
