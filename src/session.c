@@ -157,7 +157,7 @@ static a_Err_t a_Session_Open(Session_t *const session)
 
     if (A_ERR_NONE == error)
     {
-        a_Err_t error = a_Router_SessionMessageGet(session->id, &message);
+        error = a_Router_SessionMessageGet(session->id, &message);
 
         if (A_ERR_NONE != error)
         {
@@ -188,14 +188,14 @@ static a_Err_t a_Session_Open(Session_t *const session)
             }
         }
 
-        if (a_Tick_GetElapsedNow(session->last_renew_received) >= (session->lease + A_SESSION_LEASE_TOLERANCE))
+        if (a_Tick_GetElapsed(session->last_renew_received) >= (session->lease + A_SESSION_LEASE_TOLERANCE))
         {
             /* TODO log timeout error */
             session->state = A_SESSION_STATE_FAILED;
             error          = A_ERR_TIMEOUT;
         }
 
-        if (a_Tick_GetElapsedNow(session->last_renew_sent) >= (session->lease - A_SESSION_LEASE_TOLERANCE))
+        if (a_Tick_GetElapsed(session->last_renew_sent) >= (session->lease - A_SESSION_LEASE_TOLERANCE))
         {
             (void)a_Transport_MessageInitialize(&message, session->buffer, session->buffer_size);
             (void)a_Transport_MessageRenew(&message);
