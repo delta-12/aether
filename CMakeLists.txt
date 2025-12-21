@@ -62,6 +62,7 @@ set(SRCS
     ${SRC_DIR}/serial.c
     ${SRC_DIR}/session.c
     ${SRC_DIR}/socket.c
+    ${SRC_DIR}/tick.c
     ${SRC_DIR}/transport.c
 )
 

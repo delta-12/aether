@@ -1,5 +1,6 @@
 #include "transport.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -20,6 +21,9 @@ a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message, uint
     }
     else if (size >= AETHER_TRANSPORT_MTU)
     {
+        message->serialized   = false;
+        message->deserialized = false;
+
         error = a_Buffer_Initialize(&message->buffer, buffer, AETHER_TRANSPORT_MTU);
     }
 
@@ -121,7 +125,8 @@ a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message, const
 
         (void)a_Buffer_AppendLeft(&message->buffer, &serialize_buffer);
 
-        error = A_ERR_NONE;
+        message->serialized = true;
+        error               = A_ERR_NONE;
     }
 
     return error;
@@ -154,11 +159,36 @@ a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message)
         if (SIZE_MAX != size)
         {
             (void)a_Buffer_SetRead(&message->buffer, size);
-            error = A_ERR_NONE;
+            message->deserialized = true;
+            error                 = A_ERR_NONE;
         }
     }
 
     return error;
+}
+
+bool a_Transport_IsMessageSerialized(const a_Transport_Message_t *const message)
+{
+    bool serialized = false;
+
+    if (NULL != message)
+    {
+        serialized = message->serialized;
+    }
+
+    return serialized;
+}
+
+bool a_Transport_IsMessageDeserialized(const a_Transport_Message_t *const message)
+{
+    bool deserialized = false;
+
+    if (NULL != message)
+    {
+        deserialized = message->deserialized;
+    }
+
+    return deserialized;
 }
 
 a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message)

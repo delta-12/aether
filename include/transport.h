@@ -1,6 +1,7 @@
 #ifndef AETHER_TRANSPORT_H
 #define AETHER_TRANSPORT_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -36,6 +37,8 @@ typedef struct
     a_Transport_PeerId_t peer_id;
     a_Transport_SequenceNumber_t sequence_number;
     a_Buffer_t buffer;
+    bool serialized;
+    bool deserialized;
 } a_Transport_Message_t;
 
 #ifdef __cplusplus
@@ -51,6 +54,8 @@ a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message);
 /* TODO publish, subscribe messages */
 a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message, const a_Transport_PeerId_t peer_id, const a_Transport_SequenceNumber_t sequence_number);
 a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message);
+bool a_Transport_IsMessageSerialized(const a_Transport_Message_t *const message);
+bool a_Transport_IsMessageDeserialized(const a_Transport_Message_t *const message);
 a_Buffer_t *a_Transport_GetMessageBuffer(a_Transport_Message_t *const message);
 a_Transport_Header_t a_Transport_GetMessageHeader(const a_Transport_Message_t *const message);
 a_Transport_PeerId_t a_Transport_GetMessagePeerId(const a_Transport_Message_t *const message);

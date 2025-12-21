@@ -5,6 +5,9 @@
 #include "socket.h"
 #include "transport.h"
 
+#define A_SESSION_LEASE_TOLERANCE (a_Tick_Ms_t)10U   /* TODO make sure tolerance is not greater than minimum lease time or make tolerance a percentage */
+#define A_SESSION_DEFAULT_LEASE   (a_Tick_Ms_t)1000U /* TODO */
+
 static a_Err_t a_Session_Connect(Session_t *const session);
 static a_Err_t a_Session_Accept(Session_t *const session);
 static a_Err_t a_Session_Open(Session_t *const session);
@@ -16,7 +19,7 @@ a_Err_t a_Session_Initialize(Session_t *const session, a_Socket_t *const socket,
     if ((NULL != session) && (NULL != socket))
     {
         session->state       = A_SESSION_STATE_CONNECT;
-        session->lease       = 1000U; /* TODO */
+        session->lease       = A_SESSION_DEFAULT_LEASE;
         session->buffer      = buffer;
         session->buffer_size = buffer_size;
 
@@ -106,7 +109,7 @@ static a_Err_t a_Session_Accept(Session_t *const session)
     {
         error = a_Router_SessionMessageGet(session->id, &message);
 
-        if ((A_ERR_NONE != error) || (0U != a_Buffer_GetReadSize(a_Transport_GetMessageBuffer(&message))))
+        if ((A_ERR_NONE != error) || !a_Transport_IsMessageDeserialized(&message))
         {
             /* Error receiving message or no message received */
         }
@@ -126,7 +129,11 @@ static a_Err_t a_Session_Accept(Session_t *const session)
         {
             /* TODO verify MTU matches */
             /* TODO log session open */
-            session->state = A_SESSION_STATE_OPEN;
+
+            a_Tick_Ms_t now = a_Tick_GetTick();
+            session->last_renew_received = now;
+            session->last_renew_sent     = now;
+            session->state               = A_SESSION_STATE_OPEN;
         }
         else
         {
@@ -136,7 +143,7 @@ static a_Err_t a_Session_Accept(Session_t *const session)
 
     if (A_ERR_NONE != error)
     {
-        /* TODO log error and session failure */
+        /* TODO log session failure */
         session->state = A_SESSION_STATE_FAILED;
     }
 
@@ -145,11 +152,56 @@ static a_Err_t a_Session_Accept(Session_t *const session)
 
 static a_Err_t a_Session_Open(Session_t *const session)
 {
-    A_UNUSED(session);
+    a_Transport_Message_t message;
+    a_Err_t               error = a_Transport_MessageInitialize(&message, session->buffer, session->buffer_size);
 
-    /* TODO */
+    if (A_ERR_NONE == error)
+    {
+        a_Err_t error = a_Router_SessionMessageGet(session->id, &message);
 
-    /* TODO handle lease expiration */
+        if (A_ERR_NONE != error)
+        {
+            /* Error receiving message */
+        }
+        else if (a_Transport_IsMessageDeserialized(&message))
+        {
+            switch (a_Transport_GetMessageHeader(&message))
+            {
+            case A_TRANSPORT_HEADER_CLOSE:
+                /* TODO log session close */
+                session->state = A_SESSION_STATE_CLOSED;
+                break;
+            case A_TRANSPORT_HEADER_RENEW:
+                session->last_renew_received = a_Tick_GetTick();
+                break;
+            case A_TRANSPORT_HEADER_SUBSCRIBE:
+                /* TODO */
+                break;
+            case A_TRANSPORT_HEADER_PUBLISH:
+                /* TODO */
+                break;
+            case A_TRANSPORT_HEADER_CONNECT:
+            case A_TRANSPORT_HEADER_ACCEPT:
+            default:
+                /* TODO verbose log invalid header */
+                break;
+            }
+        }
 
-    return A_ERR_NONE;
+        if (a_Tick_GetElapsedNow(session->last_renew_received) >= (session->lease + A_SESSION_LEASE_TOLERANCE))
+        {
+            /* TODO log timeout error */
+            session->state = A_SESSION_STATE_FAILED;
+            error          = A_ERR_TIMEOUT;
+        }
+
+        if (a_Tick_GetElapsedNow(session->last_renew_sent) >= (session->lease - A_SESSION_LEASE_TOLERANCE))
+        {
+            (void)a_Transport_MessageInitialize(&message, session->buffer, session->buffer_size);
+            (void)a_Transport_MessageRenew(&message);
+            error = a_Router_SessionMessageSend(session->id, &message);
+        }
+    }
+
+    return error;
 }

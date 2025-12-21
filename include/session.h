@@ -24,6 +24,8 @@ typedef struct
     a_Router_SessionId_t id;
     a_Session_State_t state;
     a_Tick_Ms_t lease;
+    a_Tick_Ms_t last_renew_received;
+    a_Tick_Ms_t last_renew_sent;
     uint8_t *buffer;
     size_t buffer_size;
 } Session_t;

@@ -12,7 +12,9 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-/* TODO timekeeping */
+a_Tick_Ms_t a_Tick_GetTick(void);
+a_Tick_Ms_t a_Tick_GetElapsed(const a_Tick_Ms_t start, const a_Tick_Ms_t end);
+a_Tick_Ms_t a_Tick_GetElapsedNow(const a_Tick_Ms_t start);
 
 #ifdef __cplusplus
 }

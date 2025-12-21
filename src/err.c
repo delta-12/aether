@@ -27,6 +27,9 @@ char *a_Err_ToString(const a_Err_t err)
     case A_ERR_DUPLICATE:
         string = "ERR_DUPLICATE";
         break;
+    case A_ERR_TIMEOUT:
+        string = "ERR_TIMEOUT";
+        break;
     default:
         break;
     }

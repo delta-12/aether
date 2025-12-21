@@ -5,8 +5,6 @@
 #include "socket.h"
 #include "transport.h"
 
-/* TODO internally track PID+SEQ and return error to drop message if necessary*/
-
 #ifndef AETHER_ROUTER_MAX_SESSIONS
 #define AETHER_ROUTER_MAX_SESSIONS 16U
 #endif /* AETHER_ROUTER_MAX_SESSIONS */
@@ -104,7 +102,9 @@ a_Err_t a_Router_SessionMessageGet(const a_Router_SessionId_t id, a_Transport_Me
 
 a_Err_t a_Router_SessionMessageSend(const a_Router_SessionId_t id, a_Transport_Message_t *const message)
 {
-    (void)a_Transport_SerializeMessage(message, a_Router_PeerId, a_Router_SequenceNumber++);
+    (void)a_Transport_SerializeMessage(message, a_Router_PeerId, a_Router_SequenceNumber);
+    a_Router_SequenceNumber++;
+
     a_Err_t error = a_Socket_Send(a_Hashmap_Get(&a_Router_Sockets, &id), a_Transport_GetMessageBuffer(message));
 
     if (A_ERR_NONE != error)
