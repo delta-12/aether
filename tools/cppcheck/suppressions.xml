@@ -18,7 +18,7 @@
     <suppress>
         <id>constVariablePointer</id>
         <fileName>*/src/hashmap.c</fileName>
-        <lineNumber>143</lineNumber>
+        <lineNumber>119</lineNumber>
         <symbolName>value</symbolName>
     </suppress>
 

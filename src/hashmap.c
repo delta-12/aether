@@ -11,6 +11,7 @@
 #define A_HASHMAP_SENTINEL  0xFFU
 #define A_HASHMAP_HASH_SEED 5381U /* DJB2 seed */
 
+static void a_Hashmap_SetRowColumnSize(a_Hashmap_t *const hashmap, uint8_t *const data, const size_t size);
 static unsigned long a_Hashmap_Hash(const void *const key, const size_t size);
 static uint8_t *a_Hashmap_GetRow(const a_Hashmap_t *const hashmap, const void *const key);
 static uint8_t *a_Hashmap_GetColumn(uint8_t *const row, const size_t column, const size_t entry_size);
@@ -31,40 +32,15 @@ a_Err_t a_Hashmap_Initialize(a_Hashmap_t *const hashmap, uint8_t *const data, co
     }
     else
     {
-        hashmap->data       = data;
         hashmap->key_size   = key_size;
         hashmap->entry_size = hashmap->key_size + value_size;
-
-        const size_t max_entries    = size / hashmap->entry_size;
-        const size_t max_columns    = (size_t)sqrt((double)max_entries) + 1U;
-        size_t       rows           = max_entries;
-        size_t       columns        = 1U;
-        size_t       min_difference = rows - columns;
-        for (size_t i = 2U; i < max_columns; i++)
-        {
-            if (max_entries % i == 0U)
-            {
-                size_t new_rows   = max_entries / i;
-                size_t difference = new_rows - i;
-
-                if (difference < min_difference)
-                {
-                    min_difference = difference;
-                    rows           = new_rows;
-                    columns        = i;
-                }
-            }
-        }
-
-        hashmap->rows    = rows;
-        hashmap->columns = columns;
-        memset(data, A_HASHMAP_SENTINEL, size);
+        a_Hashmap_SetRowColumnSize(hashmap, data, size);
     }
 
     return error;
 }
 
-a_Err_t a_Hashmap_Insert(a_Hashmap_t *const hashmap, const void *const key, const void *const value)
+a_Err_t a_Hashmap_Insert(const a_Hashmap_t *const hashmap, const void *const key, const void *const value)
 {
     a_Err_t error = A_ERR_NULL;
 
@@ -107,7 +83,7 @@ a_Err_t a_Hashmap_Insert(a_Hashmap_t *const hashmap, const void *const key, cons
     return error;
 }
 
-void *a_Hashmap_Get(a_Hashmap_t *const hashmap, const void *const key)
+void *a_Hashmap_Get(const a_Hashmap_t *const hashmap, const void *const key)
 {
     void *value = NULL;
 
@@ -117,7 +93,7 @@ void *a_Hashmap_Get(a_Hashmap_t *const hashmap, const void *const key)
 
         for (size_t column = 0U; column < hashmap->columns; column++)
         {
-            const uint8_t *const entry = a_Hashmap_GetColumn(row, column, hashmap->entry_size);
+            uint8_t *const entry = a_Hashmap_GetColumn(row, column, hashmap->entry_size);
 
             if (0 == memcmp(entry, key, hashmap->key_size))
             {
@@ -130,7 +106,7 @@ void *a_Hashmap_Get(a_Hashmap_t *const hashmap, const void *const key)
     return value;
 }
 
-a_Err_t a_Hashmap_Remove(a_Hashmap_t *const hashmap, const void *const key)
+a_Err_t a_Hashmap_Remove(const a_Hashmap_t *const hashmap, const void *const key)
 {
     a_Err_t error = A_ERR_NONE;
 
@@ -151,6 +127,35 @@ a_Err_t a_Hashmap_Remove(a_Hashmap_t *const hashmap, const void *const key)
     return error;
 }
 
+static void a_Hashmap_SetRowColumnSize(a_Hashmap_t *const hashmap, uint8_t *const data, const size_t size)
+{
+    const size_t max_entries    = size / hashmap->entry_size;
+    const size_t max_columns    = (size_t)sqrt((double)max_entries) + 1U;
+    size_t       rows           = max_entries;
+    size_t       columns        = 1U;
+    size_t       min_difference = rows - columns;
+    for (size_t i = 2U; i < max_columns; i++)
+    {
+        if (max_entries % i == 0U)
+        {
+            size_t new_rows   = max_entries / i;
+            size_t difference = new_rows - i;
+
+            if (difference < min_difference)
+            {
+                min_difference = difference;
+                rows           = new_rows;
+                columns        = i;
+            }
+        }
+    }
+
+    hashmap->data    = data;
+    hashmap->rows    = rows;
+    hashmap->columns = columns;
+    memset(data, A_HASHMAP_SENTINEL, size);
+}
+
 static unsigned long a_Hashmap_Hash(const void *const key, const size_t size)
 {
     /* DJB2 Hash Function */
@@ -159,7 +164,7 @@ static unsigned long a_Hashmap_Hash(const void *const key, const size_t size)
 
     for (size_t i = 0U; i < size; i++)
     {
-        hash = ((hash << 5U) + hash) + *((uint8_t *)key + i);
+        hash = ((hash << 5U) + hash) + *((const uint8_t *const)key + i);
     }
 
     return hash;
