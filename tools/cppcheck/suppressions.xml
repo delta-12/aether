@@ -14,4 +14,12 @@
         <id>unusedFunction</id>
     </suppress>
 
+    <!-- Suppress variable can be declared as pointer to const false positive -->
+    <suppress>
+        <id>constVariablePointer</id>
+        <fileName>*/src/hashmap.c</fileName>
+        <lineNumber>143</lineNumber>
+        <symbolName>value</symbolName>
+    </suppress>
+
 </suppressions>

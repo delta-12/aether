@@ -9,9 +9,10 @@
 typedef struct
 {
     uint8_t *data;
-    size_t size;
     size_t key_size;
-    size_t value_size;
+    size_t entry_size;
+    size_t rows;
+    size_t columns;
 } a_Hashmap_t;
 
 #ifdef __cplusplus
