@@ -129,31 +129,23 @@ a_Err_t a_Hashmap_Remove(const a_Hashmap_t *const hashmap, const void *const key
 
 static void a_Hashmap_SetRowColumnSize(a_Hashmap_t *const hashmap, uint8_t *const data, const size_t size)
 {
-    const size_t max_entries    = size / hashmap->entry_size;
-    const size_t max_columns    = (size_t)sqrt((double)max_entries) + 1U;
-    size_t       rows           = max_entries;
-    size_t       columns        = 1U;
-    size_t       min_difference = rows - columns;
-    for (size_t i = 2U; i < max_columns; i++)
-    {
-        if (max_entries % i == 0U)
-        {
-            size_t new_rows   = max_entries / i;
-            size_t difference = new_rows - i;
+    const size_t max_entries = size / hashmap->entry_size;
+    const size_t max_columns = (size_t)sqrt((double)max_entries);
+    hashmap->data    = data;
+    hashmap->rows    = max_entries;
+    hashmap->columns = 1U;
 
-            if (difference < min_difference)
-            {
-                min_difference = difference;
-                rows           = new_rows;
-                columns        = i;
-            }
+    memset(data, A_HASHMAP_SENTINEL, size);
+
+    for (size_t columns = max_columns; columns >= 2U; columns--)
+    {
+        if (max_entries % columns == 0)
+        {
+            hashmap->columns = columns;
+            hashmap->rows    = max_entries / columns;
+            break;
         }
     }
-
-    hashmap->data    = data;
-    hashmap->rows    = rows;
-    hashmap->columns = columns;
-    memset(data, A_HASHMAP_SENTINEL, size);
 }
 
 static unsigned long a_Hashmap_Hash(const void *const key, const size_t size)
