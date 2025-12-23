@@ -17,6 +17,7 @@ static uint8_t *a_Hashmap_GetRow(const a_Hashmap_t *const hashmap, const void *c
 static uint8_t *a_Hashmap_GetColumn(uint8_t *const row, const size_t column, const size_t entry_size);
 static bool a_Hashmap_HasEntry(const uint8_t *const entry, const size_t key_size);
 static bool a_Hashmap_HasKey(const uint8_t *const entry, const void *const key, const size_t key_size);
+static void a_Hashmap_WriteEntry(const a_Hashmap_t *const hashmap, uint8_t *const entry, const void *const key, const void *const value);
 
 a_Err_t a_Hashmap_Initialize(a_Hashmap_t *const hashmap, uint8_t *const data, const size_t size, const size_t key_size, const size_t value_size)
 {
@@ -47,7 +48,6 @@ a_Err_t a_Hashmap_Insert(const a_Hashmap_t *const hashmap, const void *const key
     if ((NULL != hashmap) && (NULL != key) && (NULL != value))
     {
         uint8_t *const row          = a_Hashmap_GetRow(hashmap, key);
-        const size_t   value_size   = hashmap->entry_size - hashmap->key_size;
         size_t         empty_column = hashmap->columns;
         size_t         column       = hashmap->columns;
         do
@@ -58,7 +58,7 @@ a_Err_t a_Hashmap_Insert(const a_Hashmap_t *const hashmap, const void *const key
 
             if (a_Hashmap_HasKey(entry, key, hashmap->key_size))
             {
-                memcpy((entry + hashmap->key_size), value, value_size);
+                a_Hashmap_WriteEntry(hashmap, entry, key, value);
                 error = A_ERR_NONE;
                 break;
             }
@@ -71,7 +71,7 @@ a_Err_t a_Hashmap_Insert(const a_Hashmap_t *const hashmap, const void *const key
 
         if ((A_ERR_NONE != error) && (empty_column < hashmap->columns))
         {
-            memcpy((a_Hashmap_GetColumn(row, empty_column, hashmap->entry_size) + hashmap->key_size), value, value_size);
+            a_Hashmap_WriteEntry(hashmap, a_Hashmap_GetColumn(row, empty_column, hashmap->entry_size), key, value);
             error = A_ERR_NONE;
         }
         else
@@ -191,4 +191,10 @@ static bool a_Hashmap_HasEntry(const uint8_t *const entry, const size_t key_size
 static bool a_Hashmap_HasKey(const uint8_t *const entry, const void *const key, const size_t key_size)
 {
     return 0 == memcmp(entry, key, key_size);
+}
+
+static void a_Hashmap_WriteEntry(const a_Hashmap_t *const hashmap, uint8_t *const entry, const void *const key, const void *const value)
+{
+    memcpy(entry, key, hashmap->key_size);
+    memcpy((entry + hashmap->key_size), value, (hashmap->entry_size - hashmap->key_size));
 }
