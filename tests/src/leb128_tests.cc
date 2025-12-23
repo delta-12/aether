@@ -17,18 +17,18 @@ TEST(Leb128, EncodeNullandEmptyBuffers)
 {
     std::uint8_t buffer[1U];
 
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode8(0U, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode16(0U, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode32(0U, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode64(0U, NULL, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode8(0U, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode16(0U, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode32(0U, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode64(0U, nullptr, sizeof(buffer)));
     ASSERT_EQ(SIZE_MAX, Leb128_Encode8(0U, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Leb128_Encode16(0U, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Leb128_Encode32(0U, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Leb128_Encode64(0U, buffer, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode8(0U, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode16(0U, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode32(0U, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Encode64(0U, NULL, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode8(0U, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode16(0U, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode32(0U, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Encode64(0U, nullptr, 0U));
 }
 
 TEST(Leb128, EncodeInsufficientSize)
@@ -149,30 +149,30 @@ TEST(Leb128, DecodeNullandEmptyBuffers)
     std::uint32_t u32;
     std::uint64_t u64;
 
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, NULL, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, nullptr, sizeof(buffer)));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, buffer, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(NULL, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(NULL, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(NULL, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(NULL, NULL, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(NULL, buffer, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(NULL, buffer, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(NULL, buffer, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(NULL, buffer, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(NULL, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(NULL, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(NULL, NULL, 0U));
-    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(NULL, NULL, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(&u8, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(&u16, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(&u32, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(&u64, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(nullptr, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(nullptr, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(nullptr, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(nullptr, nullptr, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(nullptr, buffer, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(nullptr, buffer, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(nullptr, buffer, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(nullptr, buffer, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode8(nullptr, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode16(nullptr, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode32(nullptr, nullptr, 0U));
+    ASSERT_EQ(SIZE_MAX, Leb128_Decode64(nullptr, nullptr, 0U));
 }
 
 TEST(Leb128, DecodeBadEncoding)

@@ -14,8 +14,8 @@ TEST(Hashmap, Initialize)
     a_Hashmap_t hashmap;
     std::uint8_t data[(sizeof(std::uint32_t) + 10U) * 35U];
 
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Initialize(NULL, data, sizeof(data), sizeof(std::uint32_t), 10U));
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Initialize(&hashmap, NULL, sizeof(data), sizeof(std::uint32_t), 10U));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Initialize(nullptr, data, sizeof(data), sizeof(std::uint32_t), 10U));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Initialize(&hashmap, nullptr, sizeof(data), sizeof(std::uint32_t), 10U));
 
     ASSERT_EQ(A_ERR_SIZE, a_Hashmap_Initialize(&hashmap, data, 0U, sizeof(std::uint32_t), 10U));
     ASSERT_EQ(A_ERR_SIZE, a_Hashmap_Initialize(&hashmap, data, sizeof(data), 0U, 10U));
@@ -46,9 +46,9 @@ TEST(Hashmap, Insert)
     std::uint8_t value[10U] = {0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x08U, 0x09U};
     a_Hashmap_Initialize(&hashmap, data, (sizeof(std::uint32_t) + 10U) * 16U, sizeof(std::uint32_t), 10U);
 
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Insert(NULL, &key, value));
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Insert(&hashmap, NULL, value));
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Insert(&hashmap, &key, NULL));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Insert(nullptr, &key, value));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Insert(&hashmap, nullptr, value));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Insert(&hashmap, &key, nullptr));
 
     ASSERT_EQ(A_ERR_NONE, a_Hashmap_Insert(&hashmap, &key, value));
 
@@ -64,8 +64,8 @@ TEST(Hashmap, Get)
     a_Hashmap_Initialize(&hashmap, data, (sizeof(std::uint32_t) + 10U) * 16U, sizeof(std::uint32_t), 10U);
     a_Hashmap_Insert(&hashmap, &key, value);
 
-    ASSERT_EQ(NULL, a_Hashmap_Get(NULL, &key));
-    ASSERT_EQ(NULL, a_Hashmap_Get(&hashmap, NULL));
+    ASSERT_EQ(nullptr, a_Hashmap_Get(nullptr, &key));
+    ASSERT_EQ(nullptr, a_Hashmap_Get(&hashmap, nullptr));
 
     ASSERT_THAT(SPAN_FROM_VALUE(a_Hashmap_Get(&hashmap, &key), sizeof(value)), testing::ElementsAreArray(value));
 
@@ -80,14 +80,14 @@ TEST(Hashmap, Remove)
     std::uint8_t value[10U] = {0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x08U, 0x09U};
     a_Hashmap_Initialize(&hashmap, data, (sizeof(std::uint32_t) + 10U) * 16U, sizeof(std::uint32_t), 10U);
 
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Remove(NULL, &key));
-    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Remove(&hashmap, NULL));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Remove(nullptr, &key));
+    ASSERT_EQ(A_ERR_NULL, a_Hashmap_Remove(&hashmap, nullptr));
 
     ASSERT_EQ(A_ERR_NONE, a_Hashmap_Remove(&hashmap, &key));
 
     a_Hashmap_Insert(&hashmap, &key, value);
     ASSERT_EQ(A_ERR_NONE, a_Hashmap_Remove(&hashmap, &key));
-    ASSERT_EQ(NULL, a_Hashmap_Get(&hashmap, &key));
+    ASSERT_EQ(nullptr, a_Hashmap_Get(&hashmap, &key));
 
     /* TODO */
 }
