@@ -21,8 +21,11 @@ a_Err_t a_Transport_MessageInitialize(a_Transport_Message_t *const message, uint
     }
     else if (size >= AETHER_TRANSPORT_MTU)
     {
-        message->serialized   = false;
-        message->deserialized = false;
+        message->header          = A_TRANSPORT_HEADER_MAX;
+        message->peer_id         = A_TRANSPORT_PEER_ID_MAX;
+        message->sequence_number = A_TRANSPORT_SEQUENCE_NUMBER_MAX;
+        message->serialized      = false;
+        message->deserialized    = false;
 
         error = a_Buffer_Initialize(&message->buffer, buffer, AETHER_TRANSPORT_MTU);
     }
