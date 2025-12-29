@@ -6,14 +6,15 @@
 
 #include "buffer.h"
 #include "err.h"
+#include "socket.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif /* __cplusplus */
 
-a_Err_t a_Serial_Send(size_t (*send)(const uint8_t *const data, const size_t size), a_Buffer_t *const data, a_Buffer_t *const buffer);
-a_Err_t a_Serial_Receive(size_t (*receive)(uint8_t *const data, const size_t size), a_Buffer_t *const data, a_Buffer_t *const buffer);
+a_Err_t a_Serial_Send(a_Socket_t *const socket, a_Buffer_t *const data);
+a_Err_t a_Serial_Receive(a_Socket_t *const socket, a_Buffer_t *const data);
 
 #ifdef __cplusplus
 }

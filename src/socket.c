@@ -48,7 +48,7 @@ a_Err_t a_Socket_Send(a_Socket_t *const socket, a_Buffer_t *const data)
             /* TODO */
             break;
         case A_SOCKET_TYPE_SERIAL:
-            error = a_Serial_Send(socket->send, data, &socket->send_buffer);
+            error = a_Serial_Send(socket, data);
             break;
         default:
             error = A_ERR_SOCKET;
@@ -71,7 +71,7 @@ a_Err_t a_Socket_Receive(a_Socket_t *const socket, a_Buffer_t *const data)
             /* TODO */
             break;
         case A_SOCKET_TYPE_SERIAL:
-            error = a_Serial_Receive(socket->receive, data, &socket->receive_buffer);
+            error = a_Serial_Receive(socket, data);
             break;
         default:
             error = A_ERR_SOCKET;

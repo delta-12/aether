@@ -6,19 +6,20 @@
 #include "buffer.h"
 #include "cobs.h"
 #include "err.h"
+#include "socket.h"
 
-a_Err_t a_Serial_Send(size_t (*send)(const uint8_t *const data, const size_t size), a_Buffer_t *const data, a_Buffer_t *const buffer)
+a_Err_t a_Serial_Send(a_Socket_t *const socket, a_Buffer_t *const data)
 {
     a_Err_t error = A_ERR_NONE;
 
-    if ((NULL == send) || (NULL == data) || (NULL == buffer))
+    if ((NULL == socket) || (NULL == data))
     {
         error = A_ERR_NULL;
     }
     else if (a_Buffer_GetReadSize(data) > 0U)
     {
         /* TODO CRC before COBS encode */
-        size_t encoded = Cobs_Encode(a_Buffer_GetRead(data), a_Buffer_GetReadSize(data), a_Buffer_GetWrite(buffer), a_Buffer_GetWriteSize(buffer));
+        size_t encoded = Cobs_Encode(a_Buffer_GetRead(data), a_Buffer_GetReadSize(data), a_Buffer_GetWrite(&socket->send_buffer), a_Buffer_GetWriteSize(&socket->send_buffer));
 
         if (SIZE_MAX == encoded)
         {
@@ -27,9 +28,9 @@ a_Err_t a_Serial_Send(size_t (*send)(const uint8_t *const data, const size_t siz
         else
         {
             (void)a_Buffer_SetRead(data, a_Buffer_GetReadSize(data));
-            (void)a_Buffer_SetWrite(buffer, encoded);
+            (void)a_Buffer_SetWrite(&socket->send_buffer, encoded);
 
-            size_t sent = send(a_Buffer_GetRead(buffer), a_Buffer_GetReadSize(buffer));
+            size_t sent = socket->send(a_Buffer_GetRead(&socket->send_buffer), a_Buffer_GetReadSize(&socket->send_buffer));
 
             if (SIZE_MAX == sent)
             {
@@ -37,7 +38,7 @@ a_Err_t a_Serial_Send(size_t (*send)(const uint8_t *const data, const size_t siz
             }
             else
             {
-                (void)a_Buffer_SetRead(buffer, sent);
+                (void)a_Buffer_SetRead(&socket->send_buffer, sent);
             }
         }
     }
@@ -45,11 +46,11 @@ a_Err_t a_Serial_Send(size_t (*send)(const uint8_t *const data, const size_t siz
     return error;
 }
 
-a_Err_t a_Serial_Receive(size_t (*receive)(uint8_t *const data, const size_t size), a_Buffer_t *const data, a_Buffer_t *const buffer)
+a_Err_t a_Serial_Receive(a_Socket_t *const socket, a_Buffer_t *const data)
 {
     a_Err_t error = A_ERR_NONE;
 
-    if ((NULL == receive) || (NULL == data) || (NULL == buffer))
+    if ((NULL == socket) || (NULL == data))
     {
         error = A_ERR_NULL;
     }
@@ -57,14 +58,14 @@ a_Err_t a_Serial_Receive(size_t (*receive)(uint8_t *const data, const size_t siz
     {
         uint8_t byte = UINT8_MAX;
 
-        while ((0U != byte) && (a_Buffer_GetWriteSize(buffer) > 0U))
+        while ((0U != byte) && (a_Buffer_GetWriteSize(&socket->receive_buffer) > 0U))
         {
-            size_t received = receive(&byte, 1U);
+            size_t received = socket->receive(&byte, 1U);
 
             if (1U == received)
             {
-                *a_Buffer_GetWrite(buffer) = byte;
-                (void)a_Buffer_SetWrite(buffer, 1U);
+                *a_Buffer_GetWrite(&socket->receive_buffer) = byte;
+                (void)a_Buffer_SetWrite(&socket->receive_buffer, 1U);
             }
             else
             {
@@ -74,7 +75,8 @@ a_Err_t a_Serial_Receive(size_t (*receive)(uint8_t *const data, const size_t siz
 
         if (0U == byte)
         {
-            size_t decoded = Cobs_Decode(a_Buffer_GetWrite(data), a_Buffer_GetWriteSize(data), a_Buffer_GetRead(buffer), a_Buffer_GetReadSize(buffer));
+            size_t decoded = Cobs_Decode(a_Buffer_GetWrite(data), a_Buffer_GetWriteSize(data), a_Buffer_GetRead(&socket->receive_buffer),
+                                         a_Buffer_GetReadSize(&socket->receive_buffer));
 
             if (SIZE_MAX == decoded)
             {
@@ -83,12 +85,12 @@ a_Err_t a_Serial_Receive(size_t (*receive)(uint8_t *const data, const size_t siz
             else
             {
                 (void)a_Buffer_SetWrite(data, decoded);
-                (void)a_Buffer_SetRead(buffer, a_Buffer_GetReadSize(buffer));
+                (void)a_Buffer_SetRead(&socket->receive_buffer, a_Buffer_GetReadSize(&socket->receive_buffer));
 
                 /* TODO check CRC after COBS decode */
             }
         }
-        else if (a_Buffer_GetWriteSize(buffer) > 0U)
+        else if (a_Buffer_GetWriteSize(&socket->receive_buffer) > 0U)
         {
             error = A_ERR_SOCKET;
         }
