@@ -61,7 +61,6 @@ TEST(Buffer, SetRead)
     ASSERT_EQ(A_ERR_NONE, a_Buffer_SetRead(&buffer, 0U));
     ASSERT_EQ(A_ERR_SIZE, a_Buffer_SetRead(&buffer, 1U));
 
-    a_Buffer_Clear(&buffer);
     a_Buffer_SetWrite(&buffer, 4U);
     ASSERT_EQ(A_ERR_NONE, a_Buffer_SetRead(&buffer, 4U));
     ASSERT_EQ(A_ERR_SIZE, a_Buffer_SetRead(&buffer, 1U));
@@ -105,11 +104,14 @@ TEST(Buffer, GetRead)
     ASSERT_EQ(nullptr, a_Buffer_GetRead(&buffer));
 
     a_Buffer_SetWrite(&buffer, 2U);
+    ASSERT_EQ(&data[0U], a_Buffer_GetRead(&buffer));
+    a_Buffer_SetRead(&buffer, 1U);
     ASSERT_EQ(&data[1U], a_Buffer_GetRead(&buffer));
-    a_Buffer_SetRead(&buffer, 2U);
+    a_Buffer_SetRead(&buffer, 1U);
     ASSERT_EQ(nullptr, a_Buffer_GetRead(&buffer));
 
-    a_Buffer_SetWrite(&buffer, 1U);
+    a_Buffer_SetWrite(&buffer, 4U);
+    a_Buffer_SetRead(&buffer, 3U);
     ASSERT_EQ(&data[3U], a_Buffer_GetRead(&buffer));
     a_Buffer_SetRead(&buffer, 1U);
     ASSERT_EQ(nullptr, a_Buffer_GetRead(&buffer));
