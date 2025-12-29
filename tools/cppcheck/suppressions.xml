@@ -14,14 +14,12 @@
         <id>unusedFunction</id>
     </suppress>
 
-    <!-- Suppress static linkage for functions to be used outside of translation unit -->
+    <!-- Suppress variable can be declared as pointer to const false positive -->
     <suppress>
-        <id>staticFunction</id>
-        <symbolName>Leb128_Encode64</symbolName>
-    </suppress>
-    <suppress>
-        <id>staticFunction</id>
-        <symbolName>Leb128_Decode64</symbolName>
+        <id>constVariablePointer</id>
+        <fileName>*/src/hashmap.c</fileName>
+        <lineNumber>119</lineNumber>
+        <symbolName>value</symbolName>
     </suppress>
 
 </suppressions>

@@ -31,8 +31,14 @@ endif()
 # Aether tests
 ################################################################################
 set(${PROJECT_NAME}_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/cobs_tests.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/leb128_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/buffer_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cobs_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/err_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hashmap_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/leb128_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/serial_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tick_tests.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/transport_tests.cc
 )
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${${PROJECT_NAME}_SRCS})
 add_executable(${PROJECT_NAME})

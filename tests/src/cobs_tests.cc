@@ -11,8 +11,8 @@ TEST(Cobs, EncodeNullAndEmptyBuffers)
     std::uint8_t encoded[] = {0x01U, 0x00U};
     std::uint8_t buffer[sizeof(encoded)];
 
-    ASSERT_EQ(SIZE_MAX, Cobs_Encode(NULL, sizeof(data), buffer, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Cobs_Encode(data, sizeof(data), NULL, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Cobs_Encode(nullptr, sizeof(data), buffer, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Cobs_Encode(data, sizeof(data), nullptr, sizeof(buffer)));
     ASSERT_EQ(SIZE_MAX, Cobs_Encode(data, 0U, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Cobs_Encode(data, sizeof(data), buffer, 0U));
     ASSERT_EQ(2U, Cobs_Encode(data, 0U, buffer, sizeof(buffer)));
@@ -191,8 +191,8 @@ TEST(Cobs, DecodeNullAndEmptyBuffers)
     std::uint8_t buffer[] = {0x01U, 0x00U};
     std::uint8_t data[sizeof(decoded)];
 
-    ASSERT_EQ(SIZE_MAX, Cobs_Decode(NULL, sizeof(data), buffer, sizeof(buffer)));
-    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), NULL, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(nullptr, sizeof(data), buffer, sizeof(buffer)));
+    ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), nullptr, sizeof(buffer)));
     ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, 0U, buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), buffer, 0U));
     ASSERT_EQ(SIZE_MAX, Cobs_Decode(data, sizeof(data), buffer, 1U));
