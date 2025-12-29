@@ -137,7 +137,7 @@ TEST(Transport, GetMessageHeader)
     std::uint8_t buffer[AETHER_TRANSPORT_MTU];
     a_Transport_MessageInitialize(&message, buffer, sizeof(buffer));
 
-    ASSERT_EQ(A_TRANSPORT_HEADER_MAX, a_Transport_GetMessageHeader(NULL));
+    ASSERT_EQ(A_TRANSPORT_HEADER_MAX, a_Transport_GetMessageHeader(nullptr));
     ASSERT_EQ(A_TRANSPORT_HEADER_MAX, a_Transport_GetMessageHeader(&message));
 
     a_Transport_MessageConnect(&message, 1000U);
@@ -152,7 +152,7 @@ TEST(Transport, GetMessagePeerId)
     std::uint8_t buffer[AETHER_TRANSPORT_MTU];
     a_Transport_MessageInitialize(&message, buffer, sizeof(buffer));
 
-    ASSERT_EQ(A_TRANSPORT_PEER_ID_MAX, a_Transport_GetMessagePeerId(NULL));
+    ASSERT_EQ(A_TRANSPORT_PEER_ID_MAX, a_Transport_GetMessagePeerId(nullptr));
     ASSERT_EQ(A_TRANSPORT_PEER_ID_MAX, a_Transport_GetMessagePeerId(&message));
 
     a_Transport_MessageConnect(&message, 1000U);
@@ -167,7 +167,7 @@ TEST(Transport, GetMessageSequenceNumber)
     std::uint8_t buffer[AETHER_TRANSPORT_MTU];
     a_Transport_MessageInitialize(&message, buffer, sizeof(buffer));
 
-    ASSERT_EQ(A_TRANSPORT_SEQUENCE_NUMBER_MAX, a_Transport_GetMessageSequenceNumber(NULL));
+    ASSERT_EQ(A_TRANSPORT_SEQUENCE_NUMBER_MAX, a_Transport_GetMessageSequenceNumber(nullptr));
     ASSERT_EQ(A_TRANSPORT_SEQUENCE_NUMBER_MAX, a_Transport_GetMessageSequenceNumber(&message));
 
     a_Transport_MessageConnect(&message, 1000U);
@@ -182,7 +182,7 @@ TEST(Transport, GetMessageLease)
     std::uint8_t buffer[AETHER_TRANSPORT_MTU];
     a_Transport_MessageInitialize(&message, buffer, sizeof(buffer));
 
-    ASSERT_EQ(A_TICK_MS_MAX, a_Transport_GetMessageLease(NULL));
+    ASSERT_EQ(A_TICK_MS_MAX, a_Transport_GetMessageLease(nullptr));
     ASSERT_EQ(A_TICK_MS_MAX, a_Transport_GetMessageLease(&message));
 
     a_Transport_MessageConnect(&message, 1000U);
