@@ -56,11 +56,12 @@ a_Err_t a_Serial_Receive(a_Socket_t *const socket, a_Buffer_t *const data)
     }
     else
     {
-        uint8_t byte = UINT8_MAX;
+        uint8_t byte     = UINT8_MAX;
+        size_t  received = 0U;
 
         while ((0U != byte) && (a_Buffer_GetWriteSize(&socket->receive_buffer) > 0U))
         {
-            size_t received = socket->receive(&byte, 1U);
+            received = socket->receive(&byte, 1U);
 
             if (1U == received)
             {
@@ -90,7 +91,7 @@ a_Err_t a_Serial_Receive(a_Socket_t *const socket, a_Buffer_t *const data)
                 /* TODO check CRC after COBS decode */
             }
         }
-        else if (a_Buffer_GetWriteSize(&socket->receive_buffer) > 0U)
+        else if ((0U == a_Buffer_GetWriteSize(&socket->receive_buffer)) || (SIZE_MAX == received))
         {
             error = A_ERR_SOCKET;
         }

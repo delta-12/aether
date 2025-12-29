@@ -100,10 +100,55 @@ TEST_F(Serial, Send)
 
 TEST_F(Serial, Receive)
 {
-    a_Buffer_t data;
+    std::uint8_t encoded[] = {0x03U, 0x01U, 0x02U, 0x04U, 0x03U, 0x04U, 0x05U, 0x00U};
+    std::uint8_t decoded[] = {0x01U, 0x02U, 0x00U, 0x03U, 0x04U, 0x05U};
+    std::uint8_t data[sizeof(decoded)] = {0x00U};
+    a_Buffer_t buffer;
 
-    ASSERT_EQ(A_ERR_NULL, a_Serial_Receive(nullptr, &data));
+    {
+        testing::InSequence sequence;
+
+        for (std::size_t i = 0; i < sizeof(encoded) / 2U; i++)
+        {
+            EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U)).Times(1).WillOnce(testing::DoAll(testing::SetArgPointee<0>(encoded[i]), testing::Return(1U)));
+        }
+        EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U)).Times(2).WillRepeatedly(testing::Return(0U));
+        EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U)).Times(1).WillOnce(testing::Return(SIZE_MAX));
+        for (std::size_t i = sizeof(encoded) / 2U; i < sizeof(encoded); i++)
+        {
+            EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U)).Times(1).WillOnce(testing::DoAll(testing::SetArgPointee<0>(encoded[i]), testing::Return(1U)));
+        }
+        for (std::size_t i = 0; i < sizeof(encoded); i++)
+        {
+            EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U)).Times(1).WillOnce(testing::DoAll(testing::SetArgPointee<0>(encoded[i]), testing::Return(1U)));
+        }
+    }
+
+    a_Buffer_Initialize(&buffer, data, sizeof(data));
+
+    ASSERT_EQ(A_ERR_NULL, a_Serial_Receive(nullptr, &buffer));
     ASSERT_EQ(A_ERR_NULL, a_Serial_Receive(&socket_, nullptr));
 
-    /* TODO */
+    ASSERT_EQ(A_ERR_NONE, a_Serial_Receive(&socket_, &buffer));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+    ASSERT_EQ((sizeof(encoded) / 2U), a_Buffer_GetReadSize(&socket_.receive_buffer));
+
+    ASSERT_EQ(A_ERR_NONE, a_Serial_Receive(&socket_, &buffer));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+    ASSERT_EQ((sizeof(encoded) / 2U), a_Buffer_GetReadSize(&socket_.receive_buffer));
+
+    ASSERT_EQ(A_ERR_SOCKET, a_Serial_Receive(&socket_, &buffer));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&buffer));
+    ASSERT_EQ((sizeof(encoded) / 2U), a_Buffer_GetReadSize(&socket_.receive_buffer));
+
+    ASSERT_EQ(A_ERR_NONE, a_Serial_Receive(&socket_, &buffer));
+    ASSERT_EQ(sizeof(decoded), a_Buffer_GetReadSize(&buffer));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&socket_.receive_buffer));
+    ASSERT_THAT(data, testing::ElementsAreArray(decoded));
+
+    a_Buffer_SetRead(&buffer, sizeof(decoded));
+    ASSERT_EQ(A_ERR_NONE, a_Serial_Receive(&socket_, &buffer));
+    ASSERT_EQ(sizeof(decoded), a_Buffer_GetReadSize(&buffer));
+    ASSERT_EQ(0U, a_Buffer_GetReadSize(&socket_.receive_buffer));
+    ASSERT_THAT(data, testing::ElementsAreArray(decoded));
 }
