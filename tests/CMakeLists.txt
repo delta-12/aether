@@ -69,7 +69,9 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     )
     target_link_options(${AETHER_TEST_TARGET}
         PRIVATE
-            $<$<CONFIG:Debug>:--coverage>
+            $<$<AND:$<CONFIG:Debug>,$<BOOL:${AETHER_ENABLE_COVERAGE}>>:
+                --coverage
+            >
             $<$<AND:$<CONFIG:Debug>,$<BOOL:${AETHER_ENABLE_ASAN}>>:
                 -fsanitize=address
             >

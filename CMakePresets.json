@@ -12,6 +12,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "AETHER_BUILD_TESTS": "ON",
+                "AETHER_ENABLE_COVERAGE": "ON",
                 "AETHER_LOG_ENABLED": "ON"
             }
         },
