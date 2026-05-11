@@ -10,11 +10,22 @@
 #include "router.h"
 #include "socket.h"
 #include "transport.h"
+#include "version.h"
 
 static const char *const a_LogTag = "AETHER";
 
 a_Err_t a_Initialize(const a_Transport_PeerId_t id)
 {
+    A_LOG_DEBUG(a_LogTag,
+                "Aether Info:\n"
+                "    Branch: %s\n"
+                "    Commit: %s (%s)\n"
+                "    Tag: %s",
+                AETHER_GIT_BRANCH,
+                AETHER_GIT_COMMIT_HASH,
+                AETHER_GIT_DIRTY,
+                AETHER_GIT_TAG);
+
     a_Random_Seed();
 
     a_Err_t error = a_Router_Initialize(id);
