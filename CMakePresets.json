@@ -29,6 +29,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "AETHER_BUILD_TESTS": "OFF",
+                "AETHER_ENABLE_COVERAGE": "OFF",
                 "AETHER_LOG_LEVEL": "A_LOG_LEVEL_INFO"
             }
         }
