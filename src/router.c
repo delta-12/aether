@@ -468,8 +468,11 @@ static a_Err_t a_Router_SessionConnect(const a_Router_SessionId_t id, a_Router_S
 
     if (A_ERR_NONE == error)
     {
+        session->lease = AETHER_SESSION_LEASE;
+
         a_Transport_MessageReset(&session->message);
         (void)a_Transport_MessageConnect(&session->message, session->lease);
+
         error = a_Router_SessionMessageSend(id, session);
     }
 
@@ -477,7 +480,6 @@ static a_Err_t a_Router_SessionConnect(const a_Router_SessionId_t id, a_Router_S
     {
         session->state               = A_ROUTER_SESSION_STATE_ACCEPT;
         session->retries             = 1U;
-        session->lease               = AETHER_SESSION_LEASE;
         session->last_renew_received = a_Tick_GetTick();
         session->accept_sent         = false;
 
