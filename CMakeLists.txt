@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(AETHER_TARGET aether)
 
 option(AETHER_BUILD_TESTS "Build Aether tests" OFF)
+option(AETHER_ENABLE_COVERAGE "Build Aether with coverage enabled" OFF)
 option(AETHER_ENABLE_ASAN "Build Aether with AddressSanitizer enabled" OFF)
 
 ################################################################################
@@ -118,7 +119,9 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         PRIVATE
             -Wall -Wextra -Werror -Wpedantic -fdiagnostics-color=always
             -fPIC
-            $<$<CONFIG:Debug>:-g --coverage>
+            $<$<AND:$<CONFIG:Debug>,$<BOOL:${AETHER_ENABLE_COVERAGE}>>:
+                -g --coverage
+            >
             $<$<CONFIG:Debug>:
                 $<IF:$<BOOL:${AETHER_ENABLE_ASAN}>,-O1,-O0>
             >
@@ -128,7 +131,9 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     )
     target_link_options(${AETHER_TARGET}
         PRIVATE
-            $<$<CONFIG:Debug>:--coverage>
+            $<$<AND:$<CONFIG:Debug>,$<BOOL:${AETHER_ENABLE_COVERAGE}>>:
+                --coverage
+            >
             $<$<AND:$<CONFIG:Debug>,$<BOOL:${AETHER_ENABLE_ASAN}>>:
                 -fsanitize=address
             >
@@ -212,36 +217,38 @@ endif()
 ################################################################################
 # Coverage
 ################################################################################
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    find_program(GCOVR_PATH gcovr
-        HINTS "$ENV{HOME}/.local/bin"
-            "/root/.local/bin"
-    )
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR AND AETHER_ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        if(GCOVR_PATH)
-            message(STATUS "Found Gcovr at: ${GCOVR_PATH}")
-            set(GCOVR_ARGS -r ${CMAKE_CURRENT_BINARY_DIR} -f ${INCLUDE_DIR} -f ${SRC_DIR} --exclude-throw-branches)
-            if(DEFINED ENV{GCOV_EXECUTABLE})
-                set(GCOVR_ARGS --gcov-executable $ENV{GCOV_EXECUTABLE} ${GCOVR_ARGS})
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            find_program(GCOVR_PATH gcovr
+                HINTS "$ENV{HOME}/.local/bin"
+                    "/root/.local/bin"
+            )
+            if(GCOVR_PATH)
+                message(STATUS "Found Gcovr at: ${GCOVR_PATH}")
+                set(GCOVR_ARGS -r ${CMAKE_CURRENT_BINARY_DIR} -f ${INCLUDE_DIR} -f ${SRC_DIR} --exclude-throw-branches)
+                if(DEFINED ENV{GCOV_EXECUTABLE})
+                    set(GCOVR_ARGS --gcov-executable $ENV{GCOV_EXECUTABLE} ${GCOVR_ARGS})
+                endif()
+                add_custom_target(
+                    coverage
+                    COMMAND ${GCOVR_PATH} ${GCOVR_ARGS} --html-details --html-theme github.dark-green -o coverage.html
+                    COMMENT "Generating code coverage report..."
+                    DEPENDS test
+                )
+                add_custom_target(
+                    coverage-no-test
+                    COMMAND ${GCOVR_PATH} ${GCOVR_ARGS} --html-details --html-theme github.dark-green -o coverage.html
+                    COMMENT "Generating code coverage report..."
+                )
+                add_custom_target(
+                    sonarqube-coverage
+                    COMMAND ${GCOVR_PATH} ${GCOVR_ARGS} --sonarqube -o coverage.xml
+                    COMMENT "Generating code coverage report..."
+                )
+            else()
+                message(WARNING "Gcovr not found.")
             endif()
-            add_custom_target(
-                coverage
-                COMMAND ${GCOVR_PATH} ${GCOVR_ARGS} --html-details --html-theme github.dark-green -o coverage.html
-                COMMENT "Generating code coverage report..."
-                DEPENDS test
-            )
-            add_custom_target(
-                coverage-no-test
-                COMMAND ${GCOVR_PATH} ${GCOVR_ARGS} --html-details --html-theme github.dark-green -o coverage.html
-                COMMENT "Generating code coverage report..."
-            )
-            add_custom_target(
-                sonarqube-coverage
-                COMMAND ${GCOVR_PATH} ${GCOVR_ARGS} --sonarqube -o coverage.xml
-                COMMENT "Generating code coverage report..."
-            )
-        else()
-            message(WARNING "Gcovr not found.")
         endif()
     else()
         message(WARNING "Gcovr does not support compiler.")
