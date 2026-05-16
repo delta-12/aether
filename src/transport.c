@@ -246,7 +246,7 @@ a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message)
             (void)a_Buffer_SetRead(&message->buffer, size);
             uint64_t header;
             size            = Leb128_Decode64(&header, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
-            message->header = header;
+            message->header = (a_Transport_Header_t)header;
         }
 
         if (SIZE_MAX != size)
