@@ -69,6 +69,14 @@ TEST_F(Aether, Initialize)
     ASSERT_EQ(A_ERR_NONE, a_Initialize(A_TRANSPORT_PEER_ID_MAX));
 }
 
+TEST_F(Aether, Deinitialize)
+{
+    a_Deinitialize();
+
+    a_Initialize(A_TRANSPORT_PEER_ID_MAX);
+    a_Deinitialize();
+}
+
 TEST_F(Aether, AddSocket)
 {
     a_Initialize(A_TRANSPORT_PEER_ID_MAX);
