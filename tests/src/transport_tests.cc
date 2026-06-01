@@ -104,6 +104,20 @@ TEST(Transport, MessageSubscribe)
     ASSERT_EQ(A_ERR_NONE, a_Transport_MessageSubscribe(&message, "/foo/bar"));
 }
 
+TEST(Transport, MessageUnsubscribe)
+{
+    a_Transport_Message_t message;
+    std::uint8_t buffer[SERIALIZE_BUFFER_SIZE + LEB128_MAX_SIZE(uint64_t) + 9U];
+    a_Transport_MessageInitialize(&message, buffer, sizeof(buffer));
+
+    ASSERT_EQ(A_ERR_NULL, a_Transport_MessageUnsubscribe(nullptr, "/foo/bar"));
+    ASSERT_EQ(A_ERR_NULL, a_Transport_MessageUnsubscribe(&message, nullptr));
+
+    ASSERT_EQ(A_ERR_SIZE, a_Transport_MessageUnsubscribe(&message, "/foo/bar/"));
+
+    ASSERT_EQ(A_ERR_NONE, a_Transport_MessageUnsubscribe(&message, "/foo/bar"));
+}
+
 TEST(Transport, SerializeMessage)
 {
     a_Transport_Message_t message;
@@ -336,6 +350,11 @@ TEST(Transport, GetMessageKeySize)
     a_Transport_SerializeMessage(&message, A_TRANSPORT_PEER_ID_MAX - 1U, A_TRANSPORT_SEQUENCE_NUMBER_MAX - 1U);
     a_Transport_DeserializeMessage(&message);
     ASSERT_EQ(strlen(key) + 1U, a_Transport_GetMessageKeySize(&message));
+
+    a_Transport_MessageUnsubscribe(&message, key);
+    a_Transport_SerializeMessage(&message, A_TRANSPORT_PEER_ID_MAX - 1U, A_TRANSPORT_SEQUENCE_NUMBER_MAX - 1U);
+    a_Transport_DeserializeMessage(&message);
+    ASSERT_EQ(strlen(key) + 1U, a_Transport_GetMessageKeySize(&message));
 }
 
 TEST(Transport, GetMessageKey)
@@ -349,6 +368,19 @@ TEST(Transport, GetMessageKey)
     ASSERT_EQ(nullptr, a_Transport_GetMessageKey(&message));
 
     a_Transport_MessageSubscribe(&message, key);
+    buffer[9U] = 0xFFU;
+    a_Transport_SerializeMessage(&message, A_TRANSPORT_PEER_ID_MAX - 1U, A_TRANSPORT_SEQUENCE_NUMBER_MAX - 1U);
+    a_Transport_DeserializeMessage(&message);
+    a_Transport_GetMessageKeySize(&message);
+    ASSERT_EQ(nullptr, a_Transport_GetMessageKey(&message));
+
+    a_Transport_MessageSubscribe(&message, key);
+    a_Transport_SerializeMessage(&message, A_TRANSPORT_PEER_ID_MAX - 1U, A_TRANSPORT_SEQUENCE_NUMBER_MAX - 1U);
+    a_Transport_DeserializeMessage(&message);
+    a_Transport_GetMessageKeySize(&message);
+    ASSERT_STREQ(key, a_Transport_GetMessageKey(&message));
+
+    a_Transport_MessageUnsubscribe(&message, key);
     a_Transport_SerializeMessage(&message, A_TRANSPORT_PEER_ID_MAX - 1U, A_TRANSPORT_SEQUENCE_NUMBER_MAX - 1U);
     a_Transport_DeserializeMessage(&message);
     a_Transport_GetMessageKeySize(&message);

@@ -196,6 +196,18 @@ a_Err_t a_Transport_MessageSubscribe(a_Transport_Message_t *const message, const
     return error;
 }
 
+a_Err_t a_Transport_MessageUnsubscribe(a_Transport_Message_t *const message, const char *const key)
+{
+    a_Err_t error = a_Transport_MessageSubscribe(message, key);
+
+    if (A_ERR_NONE == error)
+    {
+        message->header = A_TRANSPORT_HEADER_UNSUBSCRIBE;
+    }
+
+    return error;
+}
+
 a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message, const a_Transport_PeerId_t peer_id, const a_Transport_SequenceNumber_t sequence_number)
 {
     a_Err_t error = A_ERR_NULL;
@@ -481,15 +493,24 @@ size_t a_Transport_GetMessageKeySize(a_Transport_Message_t *const message)
 {
     size_t key_size = SIZE_MAX;
 
-    if ((NULL != message) && (A_TRANSPORT_HEADER_SUBSCRIBE == message->header))
+    if (NULL != message)
     {
-        uint64_t     key_size_u64;
-        const size_t size = Leb128_Decode64(&key_size_u64, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
+        uint64_t key_size_u64;
+        size_t   size;
 
-        if (SIZE_MAX != size)
+        switch (message->header)
         {
-            key_size = key_size_u64;
-            (void)a_Buffer_SetRead(&message->buffer, size);
+        case A_TRANSPORT_HEADER_SUBSCRIBE:
+        case A_TRANSPORT_HEADER_UNSUBSCRIBE:
+            size = Leb128_Decode64(&key_size_u64, a_Buffer_GetRead(&message->buffer), a_Buffer_GetReadSize(&message->buffer));
+            if (SIZE_MAX != size)
+            {
+                key_size = key_size_u64;
+                (void)a_Buffer_SetRead(&message->buffer, size);
+            }
+            break;
+        default:
+            break;
         }
     }
 
@@ -500,10 +521,21 @@ char *a_Transport_GetMessageKey(const a_Transport_Message_t *const message)
 {
     char *key = NULL;
 
-    if ((NULL != message) && (A_TRANSPORT_HEADER_SUBSCRIBE == message->header))
+    if (NULL != message)
     {
-        /* TODO return NULL if string is not valid, i.e. not null terminated */
-        key = (char *)a_Buffer_GetRead(&message->buffer);
+        switch (message->header)
+        {
+        case A_TRANSPORT_HEADER_SUBSCRIBE:
+        case A_TRANSPORT_HEADER_UNSUBSCRIBE:
+            key = (char *)a_Buffer_GetRead(&message->buffer);
+            if ('\0' != *(key + a_Buffer_GetReadSize(&message->buffer) - 1U))
+            {
+                key = NULL;
+            }
+            break;
+        default:
+            break;
+        }
     }
 
     return key;

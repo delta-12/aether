@@ -33,6 +33,7 @@ typedef enum
     A_TRANSPORT_HEADER_RENEW,
     A_TRANSPORT_HEADER_PUBLISH,
     A_TRANSPORT_HEADER_SUBSCRIBE,
+    A_TRANSPORT_HEADER_UNSUBSCRIBE,
     A_TRANSPORT_HEADER_MAX
 } a_Transport_Header_t;
 
@@ -60,6 +61,7 @@ a_Err_t a_Transport_MessageClose(a_Transport_Message_t *const message);
 a_Err_t a_Transport_MessageRenew(a_Transport_Message_t *const message);
 a_Err_t a_Transport_MessagePublish(a_Transport_Message_t *const message, const char *const key, const uint8_t *const data, const size_t data_size);
 a_Err_t a_Transport_MessageSubscribe(a_Transport_Message_t *const message, const char *const key);
+a_Err_t a_Transport_MessageUnsubscribe(a_Transport_Message_t *const message, const char *const key);
 a_Err_t a_Transport_SerializeMessage(a_Transport_Message_t *const message, const a_Transport_PeerId_t peer_id, const a_Transport_SequenceNumber_t sequence_number);
 a_Err_t a_Transport_DeserializeMessage(a_Transport_Message_t *const message);
 a_Err_t a_Transport_CopyMessage(const a_Transport_Message_t *const message, a_Transport_Message_t *const copy);
