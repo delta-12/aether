@@ -68,11 +68,14 @@ typedef struct
     char *key;
 } a_Router_Subscription_t;
 
-static const char *const            a_Router_LogTag         = "ROUTER";
-static a_Transport_PeerId_t         a_Router_PeerId         = 0U;
-static a_Transport_SequenceNumber_t a_Router_SequenceNumber = 0U;
-static bool                         a_Router_RoutingEnabled = true;
-static a_Router_Deletion_t *        a_Router_DeleteList     = NULL;
+static const char *const            a_Router_LogTag                     = "ROUTER";
+static a_Transport_PeerId_t         a_Router_PeerId                     = 0U;
+static a_Transport_SequenceNumber_t a_Router_SequenceNumber             = 0U;
+static bool                         a_Router_RoutingEnabled             = true;
+static a_Router_Deletion_t *        a_Router_DeleteList                 = NULL;
+static bool                         a_Router_SessionsInitialized        = false;
+static bool                         a_Router_SequenceNumbersInitialized = false;
+static bool                         a_Router_SubscriptionsInitialized   = false;
 static a_Hashmap_t                  a_Router_Sessions;
 static a_Hashmap_t                  a_Router_SequenceNumbers;
 static a_Hashmap_t                  a_Router_Subscriptions;
@@ -114,12 +117,19 @@ a_Err_t a_Router_Initialize(const a_Transport_PeerId_t id)
 
     if (A_ERR_NONE == error)
     {
-        error = a_Hashmap_Initialize(&a_Router_SequenceNumbers);
+        a_Router_SessionsInitialized = true;
+        error                        = a_Hashmap_Initialize(&a_Router_SequenceNumbers);
     }
 
     if (A_ERR_NONE == error)
     {
-        error = a_Hashmap_Initialize(&a_Router_Subscriptions);
+        a_Router_SequenceNumbersInitialized = true;
+        error                               = a_Hashmap_Initialize(&a_Router_Subscriptions);
+    }
+
+    if (A_ERR_NONE == error)
+    {
+        a_Router_SubscriptionsInitialized = true;
     }
 
     return error;
@@ -127,10 +137,24 @@ a_Err_t a_Router_Initialize(const a_Transport_PeerId_t id)
 
 void a_Router_Deinitialize(void)
 {
-    a_Hashmap_Deinitialize(&a_Router_Sessions);
-    a_Hashmap_Deinitialize(&a_Router_SequenceNumbers);
-    a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_FreeSubscriptionCallback, NULL);
-    a_Hashmap_Deinitialize(&a_Router_Subscriptions);
+    if (a_Router_SessionsInitialized)
+    {
+        a_Hashmap_Deinitialize(&a_Router_Sessions);
+        a_Router_SessionsInitialized = false;
+    }
+
+    if (a_Router_SequenceNumbersInitialized)
+    {
+        a_Hashmap_Deinitialize(&a_Router_SequenceNumbers);
+        a_Router_SequenceNumbersInitialized = false;
+    }
+
+    if (a_Router_SubscriptionsInitialized)
+    {
+        a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_FreeSubscriptionCallback, NULL);
+        a_Hashmap_Deinitialize(&a_Router_Subscriptions);
+        a_Router_SubscriptionsInitialized = false;
+    }
 }
 
 void a_Routing_EnableRouting(const bool enable)

@@ -45,6 +45,8 @@ a_Err_t a_Initialize(const a_Transport_PeerId_t id)
 void a_Deinitialize(void)
 {
     a_Router_Deinitialize();
+
+    A_LOG_INFO(a_LogTag, "Deinitialized");
 }
 
 void a_SetLogLevel(const a_Log_Level_t level)
