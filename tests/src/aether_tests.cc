@@ -153,6 +153,11 @@ TEST_F(Aether, Task)
             EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U, testing::_)).Times(1).WillOnce(testing::DoAll(testing::SetArgPointee<0>(publish_message[i]), testing::Return(1U)));
         }
         EXPECT_CALL(*mock_subscriber_, Callback(testing::StrEq("/foo"), testing::_, testing::_, nullptr)).With(testing::Args<1, 2>(testing::ElementsAreArray(data, sizeof(data)))).Times(1);
+        EXPECT_CALL(*mock_socket_, Send(testing::_, testing::_, testing::_)).Times(1).WillOnce(testing::ReturnArg<1>());
+        for (std::size_t i = 0U; i < sizeof(publish_message); i++)
+        {
+            EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U, testing::_)).Times(1).WillOnce(testing::DoAll(testing::SetArgPointee<0>(publish_message[i]), testing::Return(1U)));
+        }
         for (std::size_t i = 0U; i < sizeof(close_message); i++)
         {
             EXPECT_CALL(*mock_socket_, Receive(testing::_, 1U, testing::_)).Times(1).WillOnce(testing::DoAll(testing::SetArgPointee<0>(close_message[i]), testing::Return(1U)));
@@ -192,6 +197,10 @@ TEST_F(Aether, Task)
     ASSERT_EQ(A_ERR_NONE, a_Publish("/qux", data, sizeof(data)));
 
     a_Task(); // Receive publish
+
+    ASSERT_EQ(A_ERR_NONE, a_Unsubscribe("/foo"));
+    a_Task(); // Receive publish
+
     a_Task(); // Receive close
     a_Task(); // Close session
 }
@@ -227,4 +236,14 @@ TEST_F(Aether, Subscribe)
     ASSERT_EQ(A_ERR_NULL, a_Subscribe("/foo", nullptr, nullptr));
 
     ASSERT_EQ(A_ERR_NONE, a_Subscribe("/foo", Callback, nullptr));
+}
+
+TEST_F(Aether, Unsubscribe)
+{
+    a_Initialize(A_TRANSPORT_PEER_ID_MAX);
+    a_AddSocket(&socket_, message_buffer_, sizeof(message_buffer_), true);
+
+    ASSERT_EQ(A_ERR_NULL, a_Unsubscribe(nullptr));
+
+    ASSERT_EQ(A_ERR_NONE, a_Unsubscribe("/foo"));
 }

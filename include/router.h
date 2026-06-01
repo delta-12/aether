@@ -25,6 +25,7 @@ a_Err_t a_Router_SessionDelete(const a_Router_SessionId_t id);
 a_Err_t a_Router_Declare(const char *const key);
 a_Err_t a_Router_Publish(const char *const key, const uint8_t *const data, const size_t size);
 a_Err_t a_Router_Subscribe(const char *const key, void (*callback)(const char *const key, const uint8_t *const data, const size_t size, void *arg), void *arg);
+a_Err_t a_Router_Unsubscribe(const char *const key);
 
 #ifdef __cplusplus
 }
