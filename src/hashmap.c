@@ -37,9 +37,10 @@ a_Err_t a_Hashmap_Initialize(a_Hashmap_t *const hashmap)
     }
     else
     {
-        hashmap->capacity = 1U;
-        hashmap->size     = 0U;
-        hashmap->entries  = a_calloc(hashmap->capacity, sizeof(a_Hashmap_Entry_t *));
+        hashmap->capacity  = 1U;
+        hashmap->size      = 0U;
+        hashmap->iterating = 0U;
+        hashmap->entries   = a_calloc(hashmap->capacity, sizeof(a_Hashmap_Entry_t *));
 
         if (NULL == hashmap->entries)
         {
@@ -69,8 +70,9 @@ void a_Hashmap_Deinitialize(a_Hashmap_t *const hashmap)
         }
 
         a_free(hashmap->entries);
-        hashmap->capacity = 0U;
-        hashmap->size     = 0U;
+        hashmap->capacity  = 0U;
+        hashmap->size      = 0U;
+        hashmap->iterating = 0U;
     }
 }
 
@@ -134,7 +136,7 @@ a_Err_t a_Hashmap_Insert(a_Hashmap_t *const hashmap, const void *const key, cons
                 hashmap->size++;
             }
 
-            if (a_Hashmap_GetSizeFactor(hashmap) > A_HASHMAP_RESIZE_THRESHOLD_HIGH)
+            if ((a_Hashmap_GetSizeFactor(hashmap) > A_HASHMAP_RESIZE_THRESHOLD_HIGH) && (0U == hashmap->iterating))
             {
                 error = a_Hashmap_Resize(hashmap, hashmap->capacity * A_HASHMAP_RESIZE_FACTOR);
             }
@@ -186,7 +188,9 @@ a_Err_t a_Hashmap_Remove(a_Hashmap_t *const hashmap, const void *const key, cons
                 a_Hashmap_FreeEntry(entry);
                 hashmap->size--;
 
-                if ((a_Hashmap_GetSizeFactor(hashmap) < A_HASHMAP_RESIZE_THRESHOLD_LOW) && (hashmap->size > 0U))
+                if ((a_Hashmap_GetSizeFactor(hashmap) < A_HASHMAP_RESIZE_THRESHOLD_LOW) &&
+                    (hashmap->size > 0U) &&
+                    (0U == hashmap->iterating))
                 {
                     error = a_Hashmap_Resize(hashmap, hashmap->capacity / A_HASHMAP_RESIZE_FACTOR);
                 }
@@ -202,28 +206,58 @@ a_Err_t a_Hashmap_Remove(a_Hashmap_t *const hashmap, const void *const key, cons
     return error;
 }
 
-void a_Hashmap_ForEach(const a_Hashmap_t *const hashmap,
-                       void (*callback)(const void *const key,
-                                        const size_t key_size,
-                                        void *const value,
-                                        const size_t value_size,
-                                        const void *const arg),
-                       const void *const arg)
+a_Err_t a_Hashmap_ForEach(a_Hashmap_t *const hashmap,
+                          void (*callback)(const void *const key,
+                                           const size_t key_size,
+                                           void *const value,
+                                           const size_t value_size,
+                                           const void *const arg),
+                          const void *const arg)
 {
-    if ((NULL != hashmap) && (NULL != callback))
+    a_Err_t error = A_ERR_NONE;
+
+    if ((NULL == hashmap) || (NULL == callback))
     {
+        error = A_ERR_NULL;
+    }
+    else
+    {
+        const size_t size = hashmap->size;
+
+        hashmap->iterating++;
+
         for (size_t i = 0U; i < hashmap->capacity; i++)
         {
             a_Hashmap_Entry_t *entry = *(hashmap->entries + i);
 
             while (NULL != entry)
             {
+                a_Hashmap_Entry_t *next = entry->next;
+
                 callback(entry->key, entry->key_size, entry->value, entry->value_size, arg);
 
-                entry = entry->next;
+                entry = next;
+            }
+        }
+
+        hashmap->iterating--;
+
+        if ((size != hashmap->size) && (0U == hashmap->iterating))
+        {
+            const double size_factor = a_Hashmap_GetSizeFactor(hashmap);
+
+            if (size_factor > A_HASHMAP_RESIZE_THRESHOLD_HIGH)
+            {
+                error = a_Hashmap_Resize(hashmap, hashmap->capacity * A_HASHMAP_RESIZE_FACTOR);
+            }
+            else if ((size_factor < A_HASHMAP_RESIZE_THRESHOLD_LOW) && (hashmap->size > 0U))
+            {
+                error = a_Hashmap_Resize(hashmap, hashmap->capacity / A_HASHMAP_RESIZE_FACTOR);
             }
         }
     }
+
+    return error;
 }
 
 static a_Err_t a_Hashmap_Resize(a_Hashmap_t *const hashmap, const size_t capacity)

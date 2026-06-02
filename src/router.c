@@ -151,7 +151,7 @@ void a_Router_Deinitialize(void)
 
     if (a_Router_SubscriptionsInitialized)
     {
-        a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_FreeSubscriptionCallback, NULL);
+        (void)a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_FreeSubscriptionCallback, NULL);
         a_Hashmap_Deinitialize(&a_Router_Subscriptions);
         a_Router_SubscriptionsInitialized = false;
     }
@@ -173,7 +173,7 @@ void a_Routing_EnableRouting(const bool enable)
 
 void a_Router_Task(void)
 {
-    a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionTaskCallback, NULL);
+    (void)a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionTaskCallback, NULL);
 
     while (NULL != a_Router_DeleteList)
     {
@@ -238,8 +238,11 @@ a_Err_t a_Router_SessionDelete(const a_Router_SessionId_t id)
 
         if (A_ERR_NONE == error)
         {
-            a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_RemoveSubscriberSessionCallback, &id);
+            error = a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_RemoveSubscriberSessionCallback, &id);
+        }
 
+        if (A_ERR_NONE == error)
+        {
             error = a_Hashmap_Remove(&a_Router_Sessions, &id, sizeof(a_Router_SessionId_t));
         }
 
@@ -377,7 +380,7 @@ a_Err_t a_Router_Subscribe(const char *const key, void (*callback)(const char *c
 
         if (A_ERR_NONE == error)
         {
-            a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionSubscribeCallback, key);
+            (void)a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionSubscribeCallback, key);
             a_Router_SequenceNumber++;
         }
         else
@@ -409,7 +412,7 @@ a_Err_t a_Router_Unsubscribe(const char *const key)
 
             if (NULL == subscription->sessions)
             {
-                a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionUnsubscribeCallback, key);
+                (void)a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionUnsubscribeCallback, key);
                 a_Router_SequenceNumber++;
 
                 a_free(subscription->key);
@@ -546,7 +549,7 @@ static a_Err_t a_Router_SessionAccept(const a_Router_SessionId_t id, a_Router_Se
                 session->last_renew_sent = tick;
                 session->state           = A_ROUTER_SESSION_STATE_OPEN;
 
-                a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_SessionSendSubscriptionsCallback, &id);
+                (void)a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_SessionSendSubscriptionsCallback, &id);
 
                 A_LOG_INFO(a_Router_LogTag, "Session %#x opened", id);
             }
@@ -641,8 +644,12 @@ static a_Err_t a_Router_SessionClose(const a_Router_SessionId_t id, a_Router_Ses
     }
     else if (session->retain)
     {
-        a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_RemoveSubscriberSessionCallback, &id);
-        session->state = A_ROUTER_SESSION_STATE_CONNECT;
+        error = a_Hashmap_ForEach(&a_Router_Subscriptions, a_Router_RemoveSubscriberSessionCallback, &id);
+
+        if (A_ERR_NONE == error)
+        {
+            session->state = A_ROUTER_SESSION_STATE_CONNECT;
+        }
     }
     else
     {
@@ -792,7 +799,7 @@ static a_Err_t a_Router_SessionHandleSubscribe(const a_Router_SessionId_t id, a_
                 new_subscriber_session->next = subscription->sessions;
                 subscription->sessions       = new_subscriber_session;
 
-                a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionForwardSubscribeCallback, session);
+                (void)a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionForwardSubscribeCallback, session);
             }
         }
         else if (a_Router_RoutingEnabled)
@@ -811,7 +818,7 @@ static a_Err_t a_Router_SessionHandleSubscribe(const a_Router_SessionId_t id, a_
 
             if (A_ERR_NONE == error)
             {
-                a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionForwardSubscribeCallback, session);
+                (void)a_Hashmap_ForEach(&a_Router_Sessions, a_Router_SessionForwardSubscribeCallback, session);
             }
             else
             {
@@ -866,13 +873,11 @@ static a_Err_t a_Router_RemoveSubscriberSession(a_Router_Subscription_t *const s
         subscriber_session = subscriber_session->next;
     }
 
-    // TODO remove subscription if sessions and function are NULL
-    (void)hash;
-    // if ((NULL == subscription->sessions) && (NULL == subscription->function))
-    // {
-    //     a_free(subscription->key);
-    //     error = a_Hashmap_Remove(&a_Router_Subscriptions, &hash, sizeof(hash));
-    // }
+    if ((NULL == subscription->sessions) && (NULL == subscription->function))
+    {
+        a_free(subscription->key);
+        error = a_Hashmap_Remove(&a_Router_Subscriptions, &hash, sizeof(hash));
+    }
 
     return error;
 }
